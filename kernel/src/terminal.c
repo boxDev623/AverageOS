@@ -1,4 +1,5 @@
 #include "terminal.h"
+#include "io.h"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -51,16 +52,29 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 	terminal_buffer[index] = vga_entry(c, color);
 }
 
+void terminal_update_cursor(int32_t x, int32_t y)
+{
+	uint16_t pos = y * VGA_WIDTH + x;
+ 
+	outportb(0x3D4, 0x0F);
+	outportb(0x3D5, (uint8_t) (pos & 0xFF));
+	outportb(0x3D4, 0x0E);
+	outportb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}
+
 void terminal_putchar(char c) 
 {
     if (c != '\n')
 	    terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
 
-	if (++terminal_column == VGA_WIDTH) {
+	if (++terminal_column == VGA_WIDTH)
+	{
 		terminal_column = 0;
 		if (++terminal_row == VGA_HEIGHT)
 			terminal_row = 0;
 	}
+
+	terminal_update_cursor(terminal_column, terminal_row);
 }
 
 void terminal_write(const char* data, size_t size) 

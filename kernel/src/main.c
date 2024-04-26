@@ -4,9 +4,13 @@
 
 #include "terminal.h"
 
+#include "io.h"
+
 void pit_event(regs_t *regs)
 {
-    terminal_writestring("never gonna give you up, never gonna let you down, ");
+    inportb(0x60);
+    //terminal_writestring("never gonna give you up, never gonna let you down, ");
+    terminal_writestring("a");
 }
  
 void kmain(uint64_t magic, uint64_t addr)
@@ -17,5 +21,5 @@ void kmain(uint64_t magic, uint64_t addr)
     gdt_initialize();
     idt_initialize();
 
-    isr_register_interrupt_handler(IRQ_BASE + IRQ0_TIMER, pit_event);
+    isr_register_interrupt_handler(IRQ_BASE + IRQ1_KEYBOARD, pit_event);
 }

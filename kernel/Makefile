@@ -1,11 +1,12 @@
 override KERNEL := kernel
+override LIBK := ../libs/libk/libk.a
 
 ASM = nasm
 CC = gcc
 LD = ld
 
 NASMFLAGS = -felf32
-CFLAGS = -c -m32 -march=i686 -std=gnu99 -Wall -Wextra -fno-stack-protector
+CFLAGS = -c -m32 -march=i686 -std=gnu99 -Wall -Wextra -fno-stack-protector -Isrc -I../libs/libk/include
 LDFLAGS = -m elf_i386
 
 override CFILES := $(shell cd src && find -L * -type f -name '*.c')
@@ -19,7 +20,7 @@ all: bin/$(KERNEL)
 
 bin/$(KERNEL): Makefile linker.ld $(OBJ)
 	mkdir -p "$$(dirname $@)"
-	$(LD) -T linker.ld $(OBJ) $(LDFLAGS) -o $@
+	$(LD) -T linker.ld $(OBJ) $(LDFLAGS) -o $@ $(LIBK)
 
 -include $(HEADER_DEPS)
 

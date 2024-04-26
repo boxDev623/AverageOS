@@ -3,6 +3,8 @@
         "stdint.h": "c",
         "idt.h": "c",
         "gdt.h": "c",
-        "isr.h": "c"
+        "isr.h": "c",
+        "stdbool.h": "c",
+        "ctype.h": "c"
     }
 }
