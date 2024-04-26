@@ -8,3 +8,7 @@ all:
 clean:
 	make -C kernel clean
 	rm isodir/boot/kernel.bin
+
+.PHONY: run
+run:
+	qemu-system-i386 -cdrom averageos.iso
