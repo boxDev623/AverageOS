@@ -18,8 +18,31 @@
 
 #include "devices/lfb.h"
 
+#include "io.h"
+
+#include <openlibm.h>
+
 kernel_memory_map_t kmap;
- 
+
+void __stack_chk_fail(void)
+{
+
+}
+
+void __attribute__ ((noreturn))
+__stack_chk_fail_local (void)
+{
+  __stack_chk_fail ();
+}
+
+float i = 0;
+
+void timer(void)
+{
+    i++;
+    lfb_put_pixel(i, sinf(i / 10.0f) * (i / 10.0f) + 16.0f, lfb_rgb(255, 0, 0));
+}
+
 void kmain(unsigned long magic, unsigned long addr)
 {
     multiboot_info_t *mboot_info = (multiboot_info_t*)addr;
@@ -30,6 +53,15 @@ void kmain(unsigned long magic, unsigned long addr)
 
     terminal_initialize();
 
+    isr_register_interrupt_handler(IRQ_BASE + IRQ0_TIMER, timer);
+    uint32_t divisor = 1193180;
+    uint8_t low  = (uint8_t)(divisor & 0xFF);
+    uint8_t high = (uint8_t)( (divisor >> 8) & 0xFF);
+
+    outportb(0x43, 0x36);
+    outportb(0x40, low);
+    outportb(0x40, high);
+
     get_kernel_memory_map(&kmap, mboot_info);
     display_kernel_memory_map(&kmap);
 
@@ -37,8 +69,4 @@ void kmain(unsigned long magic, unsigned long addr)
 	pmm_initialize_region(kmap.available.start_addr, kmap.available.size);
 
     lfb_initialize(640, 480, 32);
-    for (int i = 0; i < 100; i++)
-    {
-        lfb_put_pixel(i, i, lfb_rgb(255, 0, 0));
-    }
 }
