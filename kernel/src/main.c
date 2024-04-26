@@ -7,6 +7,8 @@
 #include "mm/pmm.h"
 #include "mm/memmap.h"
 
+#include "sys/bios32.h"
+
 #include "multiboot.h"
 
 #include <printk.h>
@@ -27,11 +29,13 @@ void kmain(unsigned long magic, unsigned long addr)
 {
     multiboot_info_t *mboot_info = (multiboot_info_t*)addr;
 
-    terminal_initialize();
-    terminal_writestring("Hello, kernel World!\n");
-
     gdt_initialize();
     idt_initialize();
+
+    bios32_initialize();
+
+    terminal_initialize();
+    terminal_writestring("Hello, kernel World!\n");
 
     isr_register_interrupt_handler(IRQ_BASE + IRQ1_KEYBOARD, pit_event);
 

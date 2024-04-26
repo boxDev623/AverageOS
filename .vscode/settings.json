@@ -11,6 +11,8 @@
         "typeinfo": "c",
         "pmm.h": "c",
         "printf.h": "c",
-        "multiboot.h": "c"
+        "multiboot.h": "c",
+        "printk.h": "c",
+        "bios32.h": "c"
     }
 }
