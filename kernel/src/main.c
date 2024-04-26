@@ -1,7 +1,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
- 
+
+#include "intr/gdt.h"
+
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,
@@ -102,4 +104,6 @@ void kmain(uint64_t magic, uint64_t addr)
  
 	/* Newline support is left as an exercise. */
 	terminal_writestring("Hello, kernel World!\n");
+
+    gdt_initialize();
 }
