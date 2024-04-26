@@ -2,7 +2,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "intr/idt.h"
 #include "intr/gdt.h"
+#include "intr/isr.h"
 
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
@@ -96,14 +98,19 @@ void terminal_writestring(const char* data)
 {
 	terminal_write(data, strlen(data));
 }
+
+void pit_event(regs_t *regs)
+{
+    terminal_writestring("a");
+}
  
 void kmain(uint64_t magic, uint64_t addr)
 {
-	/* Initialize terminal interface */
-	terminal_initialize();
- 
-	/* Newline support is left as an exercise. */
-	terminal_writestring("Hello, kernel World!\n");
+    terminal_initialize();
+    terminal_writestring("Hello, kernel World!\n");
 
     gdt_initialize();
+    idt_initialize();
+
+    isr_register_interrupt_handler(IRQ_BASE + IRQ0_TIMER, pit_event);
 }
