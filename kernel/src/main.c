@@ -16,14 +16,9 @@
 
 #include <mm/liballoc.h>
 
-kernel_memory_map_t kmap;
+#include "devices/vesa.h"
 
-void pit_event(regs_t *regs)
-{
-    inportb(0x60);
-    //terminal_writestring("never gonna give you up, never gonna let you down, ");
-    terminal_writestring("a");
-}
+kernel_memory_map_t kmap;
  
 void kmain(unsigned long magic, unsigned long addr)
 {
@@ -31,13 +26,9 @@ void kmain(unsigned long magic, unsigned long addr)
 
     gdt_initialize();
     idt_initialize();
-
     bios32_initialize();
 
     terminal_initialize();
-    terminal_writestring("Hello, kernel World!\n");
-
-    isr_register_interrupt_handler(IRQ_BASE + IRQ1_KEYBOARD, pit_event);
 
     get_kernel_memory_map(&kmap, mboot_info);
     display_kernel_memory_map(&kmap);
@@ -45,10 +36,8 @@ void kmain(unsigned long magic, unsigned long addr)
     pmm_initialize(kmap.available.start_addr, kmap.available.size);
 	pmm_initialize_region(kmap.available.start_addr, kmap.available.size);
 
-    char *name1 = kmalloc(64);
-    strcpy(name1, "Hello");
-    kfree(name1);
-    char *name2 = kmalloc(64);
-    strcpy(name2, "fgadfadsf");
-    terminal_writestring(name1);
+    vesa_initialize(640, 480, 32);
+    for (int i = 0; i <= 640; i++)
+        for (int j = 0; j <= 480; j++)
+            vbe_putpixel(i, j, vbe_rgb(255, 255, 255));
 }

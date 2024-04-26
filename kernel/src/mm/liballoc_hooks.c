@@ -11,12 +11,12 @@ int liballoc_unlock(void)
     return 0;
 }
 
-void *liballoc_alloc(int size)
+void *liballoc_alloc(size_t size)
 {
     pmm_alloc_blocks(size);
 }
 
-int liballoc_free(void *ptr, int size)
+int liballoc_free(void *ptr, size_t size)
 {
     pmm_free_blocks(ptr, size);
     return 0;

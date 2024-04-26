@@ -17,8 +17,6 @@ extern void *bios32_int_number_ptr;
 
 #define REBASE_ADDRESS(x)  (void*)(0x7c00 + (void*)x - (uint32_t)BIOS32_START)
 
-#define BIOS_CONVENTIONAL_MEMORY 0x7E00
-
 idt_ptr_t g_real_mode_gdt;
 idt_ptr_t g_real_mode_idt;
 
