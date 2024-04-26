@@ -20,4 +20,5 @@ obj/%.c.o: %.c Makefile
 
 .PHONY: clean
 clean:
-	rm -rf obj libk.a
+	rm -rf obj
+	rm libk.a

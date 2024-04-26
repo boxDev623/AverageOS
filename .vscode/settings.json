@@ -5,6 +5,12 @@
         "gdt.h": "c",
         "isr.h": "c",
         "stdbool.h": "c",
-        "ctype.h": "c"
+        "ctype.h": "c",
+        "stddef.h": "c",
+        "string.h": "c",
+        "typeinfo": "c",
+        "pmm.h": "c",
+        "printf.h": "c",
+        "multiboot.h": "c"
     }
 }

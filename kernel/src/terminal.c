@@ -64,8 +64,14 @@ void terminal_update_cursor(int32_t x, int32_t y)
 
 void terminal_putchar(char c) 
 {
-    if (c != '\n')
-	    terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+    if (c == '\n')
+	{
+		terminal_row++;
+		terminal_column = 0;
+		return;
+	}
+	
+	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
 
 	if (++terminal_column == VGA_WIDTH)
 	{
