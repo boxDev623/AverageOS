@@ -16,7 +16,7 @@
 
 #include <mm/liballoc.h>
 
-#include "devices/vesa.h"
+#include "devices/lfb.h"
 
 kernel_memory_map_t kmap;
  
@@ -36,8 +36,9 @@ void kmain(unsigned long magic, unsigned long addr)
     pmm_initialize(kmap.available.start_addr, kmap.available.size);
 	pmm_initialize_region(kmap.available.start_addr, kmap.available.size);
 
-    vesa_initialize(640, 480, 32);
-    for (int i = 0; i <= 640; i++)
-        for (int j = 0; j <= 480; j++)
-            vbe_putpixel(i, j, vbe_rgb(255, 255, 255));
+    lfb_initialize(640, 480, 32);
+    for (int i = 0; i < 100; i++)
+    {
+        lfb_put_pixel(i, i, lfb_rgb(255, 0, 0));
+    }
 }

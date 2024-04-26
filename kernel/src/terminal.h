@@ -22,7 +22,6 @@ enum vga_color {
 	VGA_COLOR_LIGHT_BROWN = 14,
 	VGA_COLOR_WHITE = 15,
 };
-size_t strlen(const char* str);
 
 void terminal_initialize(void);
 void terminal_setcolor(uint8_t color);
