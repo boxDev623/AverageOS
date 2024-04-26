@@ -10,4 +10,4 @@ Simply run ```make``` and it will build (Linux only).
 >  ```nasm```.
 
 ## Testing:
-Just make sure you have ```qemu-system-i386``` and run ```make run```.
+You can use ```VirtualBox``` or run ```make run``` to launch ```qemu-system-i386```.
