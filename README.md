@@ -1,5 +1,5 @@
-#AverageOS
-##Yet another 32-bit operating system made in C...
+# AverageOS
+## Yet another 32-bit operating system made in C...
 
 ## Building:
 Simply run ```make``` and it will build (Linux only).
