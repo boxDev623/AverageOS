@@ -12,6 +12,8 @@
 #include <printk.h>
 #include <string.h>
 
+#include <mm/liballoc.h>
+
 kernel_memory_map_t kmap;
 
 void pit_event(regs_t *regs)
@@ -37,12 +39,12 @@ void kmain(unsigned long magic, unsigned long addr)
     display_kernel_memory_map(&kmap);
 
     pmm_initialize(kmap.available.start_addr, kmap.available.size);
-	pmm_initialize_region(kmap.available.start_addr, 4 * PMM_BLOCK_SIZE);
+	pmm_initialize_region(kmap.available.start_addr, kmap.available.size);
 
-    char *name1 = (char*)pmm_alloc_block();
+    char *name1 = kmalloc(64);
     strcpy(name1, "Hello");
-    pmm_free_block((void*)name1);
-    char *name2 = (char*)pmm_alloc_block();
+    kfree(name1);
+    char *name2 = kmalloc(64);
     strcpy(name2, "fgadfadsf");
     terminal_writestring(name1);
 }

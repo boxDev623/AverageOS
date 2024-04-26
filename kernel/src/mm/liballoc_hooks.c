@@ -16,7 +16,8 @@ void *liballoc_alloc(int size)
     pmm_alloc_blocks(size);
 }
 
-int liballoc_free(void *ptr,int size)
+int liballoc_free(void *ptr, int size)
 {
     pmm_free_blocks(ptr, size);
+    return 0;
 }
