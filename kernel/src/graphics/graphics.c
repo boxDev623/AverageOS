@@ -46,11 +46,9 @@ void graphics_drawstring(const char *str, int x, int y, int color)
     {
         graphics_drawchar(*str, new_x, new_y, color);
         str++;
-        new_x += 9;
         if (new_x > (int)_width)
         {
-            new_y += 17;
-            new_x = x;
+            new_x += 13;
         }
     }
 }

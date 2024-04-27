@@ -25,7 +25,8 @@ void kmain(unsigned long magic, unsigned long addr)
     {
         ui_draw_bg();
 
-        
+        ui_draw_menu();
+        graphics_drawstring("hello!", 10, 600, lfb_rgb(255,255,255));
 
         ui_draw_mouse(can_move);
     }
