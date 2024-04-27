@@ -1,6 +1,4 @@
 #include "pit.h"
-
-#include "intr/isr.h"
 #include "io.h"
 
 void pit_initialize(uint32_t freq, isr_t callback)

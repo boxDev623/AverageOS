@@ -16,6 +16,7 @@
         "bios32.h": "c",
         "lfb.h": "c",
         "mouse.h": "c",
-        "pit.h": "c"
+        "pit.h": "c",
+        "io.h": "c"
     }
 }
