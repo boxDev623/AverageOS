@@ -8,6 +8,9 @@ static bool g_caps_lock = false;
 static bool g_shift_pressed = false;
 char g_ch = 0, g_scan_code = 0;
 
+static key_callback g_key_event;
+static char_callback g_char_event;
+
 char g_scan_code_chars[128] = {
     0, 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
     '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
@@ -64,8 +67,11 @@ void keyboard_handler(regs_t *r)
 {
     int scancode;
 
-    g_ch = 0;
     scancode = get_scancode();
+    g_key_event(scancode);
+
+    g_ch = 0;
+
     if (scancode & 0x80)
     {
         // Release
@@ -120,10 +126,14 @@ void keyboard_handler(regs_t *r)
                 }
                 break;
         }
+        char_callback(g_ch);
     }
 }
 
-void keyboard_initialize(void)
+void keyboard_initialize(key_callback key_event, char_callback char_event)
 {
+    g_key_event = key_event;
+    g_char_event = char_event;
+
     isr_register_interrupt_handler(IRQ_BASE + 1, keyboard_handler);
 }
