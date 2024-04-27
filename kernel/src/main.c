@@ -24,6 +24,9 @@ void kmain(unsigned long magic, unsigned long addr)
     while (true)
     {
         ui_draw_bg();
-        ui_draw_menu(can_move);
+
+        
+
+        ui_draw_mouse(can_move);
     }
 }

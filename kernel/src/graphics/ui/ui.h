@@ -6,4 +6,4 @@
 #include <stdint.h>
 
 void ui_draw_bg();
-void ui_draw_menu(bool can_move);
+void ui_draw_mouse(bool can_move);
