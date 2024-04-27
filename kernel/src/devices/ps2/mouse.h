@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -17,7 +19,7 @@
 #define PS2_CMD_PORT      0x64
 #define MOUSE_DATA_PORT     0x60
 
-typedef struct
+typedef struct mouse_state
 {
     uint8_t left_button: 1;
     uint8_t right_button: 1;
