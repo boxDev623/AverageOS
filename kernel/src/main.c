@@ -1,3 +1,4 @@
+#include "devices/lfb.h"
 #include "init.h"
 #include "graphics/graphics.h"
 #include "graphics/ui/ui.h"
@@ -27,7 +28,6 @@ void kmain(unsigned long magic, unsigned long addr)
     while (true)
     {
         ui_draw_menu();
-        graphics_drawstring("hello!", 10, 600, lfb_rgb(255,255,255));
 
         ui_draw_mouse(can_move);
     }

@@ -3,6 +3,8 @@
 #include "graphics/graphics.h"
 #include "devices/ps2/mouse.h"
 
+#include "images/cursor.h"
+
 #include <stdint.h>
 
 void ui_draw_bg();
