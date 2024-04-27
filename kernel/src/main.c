@@ -1,6 +1,6 @@
-#include "devices/lfb.h"
 #include "init.h"
 #include "graphics/graphics.h"
+#include "graphics/ui/ui.h"
 
 #include <printk.h>
 #include <string.h>
@@ -19,6 +19,5 @@ void kmain(unsigned long magic, unsigned long addr)
     kernel_initialize(mboot_info);
 
     graphics_initialize(1024, 768, 32);
-    
-    graphics_fillrect(500, 500, 40, 40, lfb_rgb(255,255,255));
+    ui_initialize_bg();
 }
