@@ -19,10 +19,11 @@ void kmain(unsigned long magic, unsigned long addr)
     kernel_initialize(mboot_info);
 
     graphics_initialize(1024, 768, 32);
-    ui_initialize_bg();
 
+    bool can_move = true;
     while (true)
     {
-        lfb_put_pixel(mouse_get_x(), mouse_get_y(), lfb_rgb(255, 0, 255));
+        ui_draw_bg();
+        ui_draw_menu(can_move);
     }
 }
