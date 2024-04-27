@@ -13,6 +13,8 @@
         "printf.h": "c",
         "multiboot.h": "c",
         "printk.h": "c",
-        "bios32.h": "c"
+        "bios32.h": "c",
+        "lfb.h": "c",
+        "mouse.h": "c"
     }
 }

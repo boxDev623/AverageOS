@@ -20,4 +20,9 @@ void kmain(unsigned long magic, unsigned long addr)
 
     graphics_initialize(1024, 768, 32);
     ui_initialize_bg();
+
+    while (true)
+    {
+        lfb_put_pixel(mouse_get_x(), mouse_get_y(), lfb_rgb(255, 0, 255));
+    }
 }

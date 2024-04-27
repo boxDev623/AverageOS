@@ -16,6 +16,9 @@
 #include "multiboot.h"
 // LINEAR FRAMEBUFFER
 #include "devices/lfb.h"
+
+#include "devices/ps2/mouse.h"
+
 // IO
 #include "io.h"
 

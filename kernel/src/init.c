@@ -11,4 +11,6 @@ void kernel_initialize(multiboot_info_t* mboot_info)
 
     pmm_initialize(kmap.available.start_addr, kmap.available.size);
 	pmm_initialize_region(kmap.available.start_addr, kmap.available.size);
+
+    mouse_initialize();
 }
