@@ -13,6 +13,6 @@ void ui_draw_menu()
 
 void ui_draw_mouse(bool can_move)
 {
-    while (can_move)
+    if (can_move)
         graphics_fillrect(mouse_get_x(), mouse_get_y(), 10, 10, lfb_rgb(255,0,255));
 }

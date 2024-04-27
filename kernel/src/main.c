@@ -21,10 +21,11 @@ void kmain(unsigned long magic, unsigned long addr)
     graphics_initialize(1024, 768, 32);
 
     bool can_move = true;
+
+    ui_draw_bg();
+
     while (true)
     {
-        ui_draw_bg();
-
         ui_draw_menu();
         graphics_drawstring("hello!", 10, 600, lfb_rgb(255,255,255));
 
