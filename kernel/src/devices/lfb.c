@@ -13,7 +13,6 @@ int g_selected_mode = -1;
 uint32_t g_width = 0, g_height = 0;
 
 uint32_t *g_vbe_buffer = NULL;
-uint32_t *g_back_buffer = NULL;
 
 uint32_t lfb_get_width(void) 
 {
@@ -95,19 +94,6 @@ uint32_t lfb_rgb(uint8_t red, uint8_t green, uint8_t blue)
     return color;
 }
 
-void lfb_put_pixel(int x, int y, int color)
-{
-    uint32_t i = y * g_width + x;
-    *(g_back_buffer + i) = color;
-}
-
-uint32_t lfb_get_pixel(int x, int y)
-{
-    uint32_t i = y * g_width + x;
-    uint32_t color = *(g_back_buffer + i);
-    return color;
-}
-
 int lfb_initialize(uint32_t width, uint32_t height, uint32_t bpp)
 {    
     if (!vbe_get_info())
@@ -122,32 +108,18 @@ int lfb_initialize(uint32_t width, uint32_t height, uint32_t bpp)
     g_height = g_vbe_mode_info_block.YResolution;
 
     g_vbe_buffer = (uint32_t *)g_vbe_mode_info_block.PhysBasePtr;
- 
-    //kmalloc(g_width * g_height * sizeof(uint32_t), (void**)&g_back_buffer);
-    g_back_buffer = kmalloc(g_width * g_height * sizeof(uint32_t));
 
     vbe_set_mode(g_selected_mode);
 
     return 0;
 }
 
-uint32_t *lfb_getbackbuffer(void)
+uint32_t *lfb_get_vbebuffer(void)
 {
-    return g_back_buffer;
+    return g_vbe_buffer;
 }
 
-void lfb_freebuffer(void)
+void lfb_clear_vbebuffer(void)
 {
-    kfree(g_back_buffer);
-}
-
-void lfb_swapbuffers(void)
-{
-    for (int i = 0; i < g_width * g_height; i++)
-        g_vbe_buffer[i] = g_back_buffer[i];
-}
-
-void lfb_clearbackbuffer(void)
-{
-    memset(g_back_buffer, lfb_rgb(25,25,25), g_width * g_height * sizeof(uint32_t));
+    memset(g_vbe_buffer, lfb_rgb(25,25,25), g_width * g_height * sizeof(uint32_t));
 }
