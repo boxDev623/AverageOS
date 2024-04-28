@@ -2,6 +2,7 @@
 #include "intr/isr.h"
 #include "sys/bios32.h"
 
+#include <stdint.h>
 #include <string.h>
 
 vbe20_info_block_t g_vbe_info_block;
@@ -12,6 +13,7 @@ int g_selected_mode = -1;
 uint32_t g_width = 0, g_height = 0;
 
 uint32_t *g_vbe_buffer = NULL;
+uint32_t *g_back_buffer = NULL;
 
 uint32_t lfb_get_width(void) 
 {
@@ -34,7 +36,6 @@ int vbe_get_info(void)
     
     memcpy(&g_vbe_info_block, (void *)BIOS_CONVENTIONAL_MEMORY, sizeof(vbe20_info_block_t));
     return (out.ax == 0x4F);
-    
 }
 
 void vbe_get_mode_info(uint16_t mode, vbe20_mode_info_block_t *mode_info)
@@ -72,7 +73,6 @@ uint32_t vbe_find_mode(uint32_t width, uint32_t height, uint32_t bpp)
     return -1;
 }
 
-
 void vbe_print_available_modes(void)
 {
     vbe20_mode_info_block_t modeinfoblock;
@@ -98,13 +98,13 @@ uint32_t lfb_rgb(uint8_t red, uint8_t green, uint8_t blue)
 void lfb_put_pixel(int x, int y, int color)
 {
     uint32_t i = y * g_width + x;
-    *(g_vbe_buffer + i) = color;
+    *(g_back_buffer + i) = color;
 }
 
 uint32_t lfb_get_pixel(int x, int y)
 {
     uint32_t i = y * g_width + x;
-    uint32_t color = *(g_vbe_buffer + i);
+    uint32_t color = *(g_back_buffer + i);
     return color;
 }
 
@@ -123,7 +123,31 @@ int lfb_initialize(uint32_t width, uint32_t height, uint32_t bpp)
 
     g_vbe_buffer = (uint32_t *)g_vbe_mode_info_block.PhysBasePtr;
  
+    //kmalloc(g_width * g_height * sizeof(uint32_t), (void**)&g_back_buffer);
+    g_back_buffer = kmalloc(g_width * g_height * sizeof(uint32_t));
+
     vbe_set_mode(g_selected_mode);
 
     return 0;
+}
+
+uint32_t *lfb_getbackbuffer(void)
+{
+    return g_back_buffer;
+}
+
+void lfb_freebuffer(void)
+{
+    kfree(g_back_buffer);
+}
+
+void lfb_swapbuffers(void)
+{
+    for (int i = 0; i < g_width * g_height; i++)
+        g_vbe_buffer[i] = g_back_buffer[i];
+}
+
+void lfb_clearbackbuffer(void)
+{
+    memset(g_back_buffer, lfb_rgb(25,25,25), g_width * g_height * sizeof(uint32_t));
 }

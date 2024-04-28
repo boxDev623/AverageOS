@@ -30,5 +30,8 @@ void kmain(unsigned long magic, unsigned long addr)
         ui_draw_menu();
 
         ui_draw_mouse(can_move);
+        lfb_swapbuffers();
     }
+
+    lfb_freebuffer();
 }

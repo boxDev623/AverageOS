@@ -71,6 +71,12 @@ uint32_t lfb_get_height(void);
 
 int lfb_initialize(uint32_t width, uint32_t height, uint32_t bpp);
 
+uint32_t *lfb_getbackbuffer(void);
+void lfb_clearbackbuffer(void);
+void lfb_swapbuffers(void);
+
+void lfb_freebuffer(void);
+
 void lfb_put_pixel(int x, int y, int color);
 uint32_t lfb_get_pixel(int x, int y);
 
