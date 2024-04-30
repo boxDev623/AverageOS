@@ -3,10 +3,10 @@
 #include "graphics/graphics.h"
 #include "devices/ps2/mouse.h"
 
-#include "images/cursor.h"
-
 #include <stdint.h>
 
-void ui_draw_bg();
+void ui_initialize(void);
+void ui_shutdown(void);
+void ui_render(void);
+
 void ui_draw_menu();
-void ui_draw_mouse(bool can_move);

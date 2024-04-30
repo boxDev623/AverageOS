@@ -68,7 +68,7 @@ void keyboard_handler(regs_t *r)
     int scancode;
 
     scancode = get_scancode();
-    g_key_event(scancode);
+    //g_key_event(scancode);
 
     g_ch = 0;
 
@@ -126,7 +126,7 @@ void keyboard_handler(regs_t *r)
                 }
                 break;
         }
-        char_callback(g_ch);
+        //g_char_event(g_ch);
     }
 }
 

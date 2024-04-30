@@ -8,7 +8,7 @@ CC = gcc
 LD = ld
 
 NASMFLAGS = -felf32
-CFLAGS = -c -m32 -march=i686 -std=gnu99 -Wall -Wextra -fno-stack-protector -Isrc -I../libs/libk/include -I../libs/openlibm/include -I../libs/openlibm/src
+CFLAGS = -c -w -m32 -march=i686 -std=gnu99 -Wall -Wextra -fno-stack-protector -Isrc -I../libs/libk/include -I../libs/openlibm/include -I../libs/openlibm/src
 LDFLAGS = -m elf_i386
 
 override CFILES := $(shell cd src && find -L * -type f -name '*.c')

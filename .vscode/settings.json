@@ -17,6 +17,12 @@
         "lfb.h": "c",
         "mouse.h": "c",
         "pit.h": "c",
-        "io.h": "c"
+        "io.h": "c",
+        "init.h": "c",
+        "keyboard.h": "c",
+        "nuklear.h": "c",
+        "random": "c",
+        "assert.h": "c",
+        "nuklear_rawfb.h": "c"
     }
 }

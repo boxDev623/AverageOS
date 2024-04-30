@@ -17,6 +17,7 @@
 // LINEAR FRAMEBUFFER
 #include "devices/lfb.h"
 
+#include "devices/ps2/keyboard.h"
 #include "devices/ps2/mouse.h"
 
 // IO

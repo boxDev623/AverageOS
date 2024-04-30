@@ -19,7 +19,7 @@
 #define PS2_CMD_PORT      0x64
 #define MOUSE_DATA_PORT     0x60
 
-typedef struct mouse_state
+typedef struct mouse_status
 {
     uint8_t left_button: 1;
     uint8_t right_button: 1;
@@ -30,11 +30,11 @@ typedef struct mouse_state
     uint8_t x_overflow: 1;
     uint8_t y_overflow: 1;
 }
-mouse_state_t;
+mouse_status_t;
 
 void mouse_initialize(void);
 
 int32_t mouse_get_x(void);
 int32_t mouse_get_y(void);
 
-mouse_state_t mouse_get_state(void);
+mouse_status_t mouse_get_status(void);

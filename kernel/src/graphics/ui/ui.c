@@ -1,26 +1,72 @@
 #include "ui.h"
 
-void ui_draw_bg()
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_IMPLEMENTATION
+#define NK_RAWFB_IMPLEMENTATION
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_INCLUDE_SOFTWARE_FONT
+
+#include "mm/liballoc.h"
+
+#define STBTT_malloc(x,u)  ((void)(u),kmalloc(x))
+#define STBTT_free(x,u)    ((void)(u),kfree(x))
+
+#define STBTT_assert
+
+#include "nuklear.h"
+#include "nuklear_rawfb.h"
+
+unsigned char tex_scratch[512 * 512];
+struct rawfb_context *rawfb;
+
+void ui_initialize(void)
 {
-    graphics_fillrect(0, 0, 1024, 768, lfb_rgb(25, 25, 25));
+    struct nk_context ctx;
+
+    rawfb = nk_rawfb_init(graphics_get_backbuffer(), tex_scratch, lfb_get_width(), lfb_get_height(), lfb_get_width() * 4, PIXEL_LAYOUT_XRGB_8888);
+}
+
+void ui_shutdown(void)
+{
+    nk_rawfb_shutdown(rawfb);
+}
+
+void ui_render(void)
+{
+    nk_input_begin(&rawfb->ctx);
+    nk_input_motion(&rawfb->ctx, mouse_get_x(), mouse_get_y());
+    nk_input_button(&rawfb->ctx, NK_BUTTON_LEFT, mouse_get_x(), mouse_get_y(), mouse_get_status().left_button);
+    nk_input_end(&rawfb->ctx);
+
+        /* GUI */
+        if (nk_begin(&rawfb->ctx, "Demo", nk_rect(50, 50, 200, 200),
+            NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|
+            NK_WINDOW_CLOSABLE|NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
+            enum {EASY, HARD};
+            static int op = EASY;
+            static int property = 20;
+
+            nk_layout_row_static(&rawfb->ctx, 30, 80, 1);
+            nk_button_label(&rawfb->ctx, "button");
+            nk_layout_row_dynamic(&rawfb->ctx, 30, 2);
+            if (nk_option_label(&rawfb->ctx, "easy", op == EASY)) op = EASY;
+            if (nk_option_label(&rawfb->ctx, "hard", op == HARD)) op = HARD;
+            nk_layout_row_dynamic(&rawfb->ctx, 25, 1);
+            nk_property_int(&rawfb->ctx, "Compression:", 0, &property, 100, 10, 1);
+        }
+        nk_end(&rawfb->ctx);
+    nk_rawfb_render(rawfb, nk_rgb(25,25,25), 1);
+
+    graphics_swapbuffers();
 }
 
 void ui_draw_menu()
 {
-    if (mouse_get_state().left_button)
+    if (mouse_get_status().left_button)
     {
         graphics_fillrect(mouse_get_x(), mouse_get_y(), 100, 300, lfb_rgb(255,255,255));
         graphics_drawstring("test", mouse_get_x()+10, mouse_get_y()+1, lfb_rgb(0,0,0));
-    }
-}
-
-void ui_draw_mouse(bool can_move)
-{
-    if (can_move)
-    {
-        for (int y = 0; y < 15; y++)
-            for (int x = 0; x < 11; x++)
-                if (g_gui_cursor[y * 11 + x] != 16711680)
-                    graphics_put_pixel(mouse_get_x() + x, mouse_get_y() + y, g_gui_cursor[y * 11 + x]);
     }
 }

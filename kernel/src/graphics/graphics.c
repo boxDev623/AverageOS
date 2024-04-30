@@ -1,5 +1,7 @@
 #include "graphics.h"
 #include "fonts.h"
+#include "images/cursor.h"
+
 #include <stdint.h>
 #include <string.h>
 
@@ -58,6 +60,19 @@ void graphics_drawstring(const char *str, int x, int y, int color)
     }
 }
 
+void graphics_drawcursor(int x, int y)
+{
+    uint32_t width = lfb_get_width();
+
+    for (int yy = 0; yy < 15; yy++)
+        for (int xx = 0; xx < 11; xx++)
+            if (g_gui_cursor[yy * 11 + xx] != 16711680)
+            {
+                uint32_t i = (yy + y) * width + xx + x;
+                *(g_back_buffer + i) = g_gui_cursor[yy * 11 + xx];
+            }
+}
+
 uint32_t* graphics_get_backbuffer(void)
 {
     return g_back_buffer;
@@ -65,9 +80,9 @@ uint32_t* graphics_get_backbuffer(void)
 
 void graphics_swapbuffers(void)
 {
-    //memcpy(lfb_get_vbebuffer(), graphics_get_backbuffer(), lfb_get_width() * lfb_get_height() * sizeof(uint32_t));
+    uint32_t *buffer = lfb_get_vbebuffer();
     for (int i = 0; i < lfb_get_width() * lfb_get_height(); i++)
-        lfb_get_vbebuffer()[i] = g_back_buffer[i];
+        buffer[i] = g_back_buffer[i];
 }
 
 void graphics_shutdown(void)

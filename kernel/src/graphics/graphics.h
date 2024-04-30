@@ -16,3 +16,4 @@ void graphics_shutdown(void);
 
 void graphics_drawstring(const char *str, int x, int y, int color);
 void graphics_drawchar(char ch, int x, int y, int color);
+void graphics_drawcursor(int x, int y);
