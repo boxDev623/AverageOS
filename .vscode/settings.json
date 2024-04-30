@@ -26,6 +26,8 @@
         "nuklear_rawfb.h": "c",
         "emmintrin.h": "c",
         "liballoc.h": "c",
-        "wallpaper.h": "c"
+        "wallpaper.h": "c",
+        "stdarg.h": "c",
+        "stdio.h": "c"
     }
 }

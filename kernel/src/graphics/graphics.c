@@ -1,6 +1,5 @@
 #include "graphics.h"
 #include "fonts.h"
-#include "images/cursor.h"
 
 #include <stdint.h>
 #include <string.h>
