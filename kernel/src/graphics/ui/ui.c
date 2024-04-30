@@ -18,6 +18,8 @@
 #include "nuklear.h"
 #include "nuklear_rawfb.h"
 
+#include "../images/wallpaper.h"
+
 unsigned char tex_scratch[512 * 512];
 struct rawfb_context *rawfb;
 
@@ -62,7 +64,33 @@ void ui_render(void)
             nk_property_int(&rawfb->ctx, "Compression:", 0, &property, 100, 10, 1);
         }
         nk_end(&rawfb->ctx);
-    nk_rawfb_render(rawfb, nk_rgb(25,25,25), 1);
+
+        if (nk_begin(&rawfb->ctx, "EASD", nk_rect(50, 50, 500, 500),
+            NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|
+            NK_WINDOW_CLOSABLE|NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
+            enum {EASY, HARD};
+            static int op = EASY;
+            static int property = 20;
+
+            nk_layout_row_static(&rawfb->ctx, 30, 80, 1);
+            nk_button_label(&rawfb->ctx, "button");
+            nk_layout_row_dynamic(&rawfb->ctx, 30, 2);
+            if (nk_option_label(&rawfb->ctx, "easy", op == EASY)) op = EASY;
+            if (nk_option_label(&rawfb->ctx, "hard", op == HARD)) op = HARD;
+            nk_layout_row_dynamic(&rawfb->ctx, 25, 1);
+            nk_property_int(&rawfb->ctx, "Compression:", 0, &property, 100, 10, 1);
+        }
+        nk_end(&rawfb->ctx);
+
+    {
+        uint32_t *wallpaper = g_wallpaper;
+        uint32_t *back_buffer = graphics_get_backbuffer();
+        uint32_t end_buffer = wallpaper + lfb_get_width() * lfb_get_height();
+        for (; wallpaper < end_buffer; wallpaper++, back_buffer++)
+            *back_buffer = *wallpaper;
+    }
+
+    nk_rawfb_render(rawfb, nk_rgb(0,0,0), 0);
 
     graphics_swapbuffers();
 }

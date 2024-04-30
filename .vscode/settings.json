@@ -24,6 +24,8 @@
         "random": "c",
         "assert.h": "c",
         "nuklear_rawfb.h": "c",
-        "emmintrin.h": "c"
+        "emmintrin.h": "c",
+        "liballoc.h": "c",
+        "wallpaper.h": "c"
     }
 }

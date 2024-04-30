@@ -60,19 +60,6 @@ void graphics_drawstring(const char *str, int x, int y, int color)
     }
 }
 
-void graphics_drawcursor(int x, int y)
-{
-    uint32_t width = lfb_get_width();
-
-    for (int yy = 0; yy < 15; yy++)
-        for (int xx = 0; xx < 11; xx++)
-            if (g_gui_cursor[yy * 11 + xx] != 16711680)
-            {
-                uint32_t i = (yy + y) * width + xx + x;
-                *(g_back_buffer + i) = g_gui_cursor[yy * 11 + xx];
-            }
-}
-
 uint32_t* graphics_get_backbuffer(void)
 {
     return g_back_buffer;
