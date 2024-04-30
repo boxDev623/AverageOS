@@ -36,12 +36,17 @@ void ui_shutdown(void)
 void ui_render(void)
 {
     nk_input_begin(&rawfb->ctx);
-    nk_input_motion(&rawfb->ctx, mouse_get_x(), mouse_get_y());
-    nk_input_button(&rawfb->ctx, NK_BUTTON_LEFT, mouse_get_x(), mouse_get_y(), mouse_get_status().left_button);
+    int32_t mouse_x = mouse_get_x();
+    int32_t mouse_y = mouse_get_y();
+    mouse_status_t mouse_status = mouse_get_status();
+    nk_input_motion(&rawfb->ctx, mouse_x, mouse_y);
+    nk_input_button(&rawfb->ctx, NK_BUTTON_LEFT, mouse_x, mouse_y, mouse_status.left_button);
+    nk_input_button(&rawfb->ctx, NK_BUTTON_MIDDLE, mouse_x, mouse_y, mouse_status.middle_button);
+    nk_input_button(&rawfb->ctx, NK_BUTTON_RIGHT, mouse_x, mouse_y, mouse_status.right_button);
     nk_input_end(&rawfb->ctx);
 
         /* GUI */
-        if (nk_begin(&rawfb->ctx, "Demo", nk_rect(50, 50, 200, 200),
+        if (nk_begin(&rawfb->ctx, "Demo", nk_rect(50, 50, 500, 500),
             NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|
             NK_WINDOW_CLOSABLE|NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
             enum {EASY, HARD};

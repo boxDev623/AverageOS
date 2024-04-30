@@ -23,6 +23,7 @@
         "nuklear.h": "c",
         "random": "c",
         "assert.h": "c",
-        "nuklear_rawfb.h": "c"
+        "nuklear_rawfb.h": "c",
+        "emmintrin.h": "c"
     }
 }

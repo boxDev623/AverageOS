@@ -81,8 +81,10 @@ uint32_t* graphics_get_backbuffer(void)
 void graphics_swapbuffers(void)
 {
     uint32_t *buffer = lfb_get_vbebuffer();
-    for (int i = 0; i < lfb_get_width() * lfb_get_height(); i++)
-        buffer[i] = g_back_buffer[i];
+    uint32_t *back_buffer = g_back_buffer;
+    uint32_t end_buffer = g_back_buffer + lfb_get_width() * lfb_get_height();
+    for (; back_buffer < end_buffer; back_buffer++, buffer++)
+        *buffer = *back_buffer;
 }
 
 void graphics_shutdown(void)
