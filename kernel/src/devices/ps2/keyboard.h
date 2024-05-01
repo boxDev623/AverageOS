@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define KEYBOARD_DATA_PORT      0x60
 #define KEYBOARD_STATUS_PORT    0x64
@@ -92,7 +93,8 @@
 #define SCAN_CODE_KEY_F11         0x57
 #define SCAN_CODE_KEY_F12         0x58
 
-typedef void (*key_callback)(int scancode);
+typedef void (*key_callback)(int32_t scancode);
 typedef void (*char_callback)(char ch);
 
 void keyboard_initialize(key_callback key_event, char_callback char_event);
+bool keyboard_get_scancode(int32_t scancode);

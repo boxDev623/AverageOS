@@ -20,6 +20,8 @@ char g_scan_code_chars[128] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+bool scancode_map[89];
+
 static int get_scancode(void)
 {
     int i, scancode = 0;
@@ -63,22 +65,51 @@ char alternate_chars(char ch)
     }
 }
 
+bool keyboard_get_scancode(int32_t scancode)
+{
+	return scancode_map[scancode];
+}
+
 void keyboard_handler(regs_t *r)
 {
     int scancode;
 
     scancode = get_scancode();
-    //g_key_event(scancode);
+    g_key_event(scancode);
+
+	/*switch (scancode)
+	{
+		case SCAN_CODE_KEY_DELETE: return;
+        case SCAN_CODE_KEY_BACKSPACE: return;
+        case SCAN_CODE_KEY_HOME: return;
+
+		case SCAN_CODE_KEY_UP: return;
+		case SCAN_CODE_KEY_LEFT: return;
+		case SCAN_CODE_KEY_DOWN: return;
+		case SCAN_CODE_KEY_RIGHT: return;
+	}*/
 
     g_ch = 0;
 
     if (scancode & 0x80)
     {
+		scancode -= 0x80;
+
         // Release
+		scancode_map[scancode] = false;
+
+		switch(scancode)
+		{
+        case SCAN_CODE_KEY_LEFT_SHIFT:
+            g_shift_pressed = false;
+            break;
+		}
     }
     else
     {
         // Down
+		scancode_map[scancode] = true;
+
         switch(scancode)
         {
             case SCAN_CODE_KEY_CAPS_LOCK:
@@ -93,9 +124,9 @@ void keyboard_handler(regs_t *r)
                 break;
 
             case SCAN_CODE_KEY_TAB:
-                g_ch = '\t';
+                //g_ch = '\t';
                 break;
-
+	
             case SCAN_CODE_KEY_LEFT_SHIFT:
                 g_shift_pressed = true;
                 break;
@@ -122,11 +153,10 @@ void keyboard_handler(regs_t *r)
                     }
                     else
                         g_ch = g_scan_code_chars[scancode];
-                    g_shift_pressed = false;
                 }
+        		g_char_event(g_ch);
                 break;
         }
-        //g_char_event(g_ch);
     }
 }
 

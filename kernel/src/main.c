@@ -1,5 +1,5 @@
-#include "devices/lfb.h"
 #include "init.h"
+#include "devices/lfb.h"
 #include "graphics/graphics.h"
 #include "graphics/ui/ui.h"
 
@@ -23,7 +23,7 @@ void kmain(unsigned long magic, unsigned long addr)
 
     graphics_initialize(1024, 768, 32);
 
-    keyboard_initialize(NULL, NULL);
+    keyboard_initialize(ui_key_event, ui_char_event);
     mouse_initialize();
 
     ui_initialize();

@@ -28,6 +28,16 @@
         "liballoc.h": "c",
         "wallpaper.h": "c",
         "stdarg.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "ui.h": "c",
+        "graphics.h": "c",
+        "ide.h": "c",
+        "diskio.h": "c",
+        "ff.h": "c",
+        "integer.h": "c",
+        "cstdint": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c"
     }
 }

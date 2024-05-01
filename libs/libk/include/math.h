@@ -4,6 +4,7 @@
 #define HUGE_VAL    (1e+300 * 1e+300)
 
 #include <sys/cdefs.h>
+#include <openlibm.h>
 
 __BEGIN_DECLS
 
