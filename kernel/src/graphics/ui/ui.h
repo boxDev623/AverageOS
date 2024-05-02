@@ -10,4 +10,4 @@ void ui_shutdown(void);
 void ui_render(void);
 
 void ui_key_event(int32_t scancode);
-void ui_char_event(char ch);
+void ui_char_event(int32_t ch);

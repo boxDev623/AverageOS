@@ -93,8 +93,20 @@
 #define SCAN_CODE_KEY_F11         0x57
 #define SCAN_CODE_KEY_F12         0x58
 
-typedef void (*key_callback)(int32_t scancode);
-typedef void (*char_callback)(char ch);
+#define KEYBOARD_MAX_EVENTS 256
 
-void keyboard_initialize(key_callback key_event, char_callback char_event);
-bool keyboard_get_scancode(int32_t scancode);
+typedef struct keyboard_event_data
+{
+	uint8_t scancode;
+	char ch;
+}
+keyboard_event_data_t;
+
+extern keyboard_event_data_t keyboard_event_data[KEYBOARD_MAX_EVENTS];
+extern uint32_t keyboard_event_data_length;
+
+void keyboard_initialize(void);
+void keyboard_reset_event_data(void);
+
+bool keyboard_get_scancode(uint8_t scancode);
+char keyboard_scancode_to_char(uint8_t scancode);

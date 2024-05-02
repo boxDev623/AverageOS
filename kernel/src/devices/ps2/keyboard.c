@@ -3,15 +3,16 @@
 #include "io.h"
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <ctype.h>
 
 #define KEYBOARD_USE_CAPS ((g_shift_pressed && !g_capslocked) || (!g_shift_pressed && g_capslocked))
 
+keyboard_event_data_t keyboard_event_data[KEYBOARD_MAX_EVENTS];
+uint32_t keyboard_event_data_length;
+
 bool g_shift_pressed, g_capslocked;
 bool scancode_map[89];
-
-static key_callback g_key_event;
-static char_callback g_char_event;
 
 char keyboard_scancode_to_char(uint8_t scancode)
 {
@@ -70,7 +71,12 @@ char keyboard_scancode_to_char(uint8_t scancode)
     }
 }
 
-bool keyboard_get_scancode(int32_t scancode)
+void keyboard_reset_event_data(void)
+{
+	keyboard_event_data_length = 0;
+}
+
+bool keyboard_get_scancode(uint8_t scancode)
 {
 	return scancode_map[scancode];
 }
@@ -81,7 +87,12 @@ void keyboard_handler(regs_t *r)
 		return;
 
     uint8_t scancode = inportb(KEYBOARD_DATA_PORT);
-    g_key_event(scancode);
+
+	if (keyboard_event_data_length >= KEYBOARD_MAX_EVENTS)
+		return;
+
+	keyboard_event_data_t *event_data = &keyboard_event_data[keyboard_event_data_length];
+	event_data->scancode = scancode;
 
     if (scancode & 0x80)
 	{
@@ -98,43 +109,37 @@ void keyboard_handler(regs_t *r)
 			g_shift_pressed = false;
 			break;
 		}
-		return;
+
+		event_data->ch = NULL;
+	}
+	else
+	{
+		scancode_map[scancode] = true;
+
+		switch (scancode)
+		{
+		case SCAN_CODE_KEY_CAPS_LOCK:
+			g_capslocked = !g_capslocked;
+			break;
+
+		case SCAN_CODE_KEY_LEFT_SHIFT:
+			g_shift_pressed = true;
+			break;
+
+		case SCAN_CODE_KEY_RIGHT_SHIFT:
+			g_shift_pressed = true;
+			break;
+		
+		default:
+			event_data->ch = keyboard_scancode_to_char(scancode);
+			break;
+		}
 	}
 
-	scancode_map[scancode] = true;
-
-    switch (scancode)
-    {
-    case SCAN_CODE_KEY_CAPS_LOCK:
-        g_capslocked = !g_capslocked;
-        break;
-
-	case SCAN_CODE_KEY_LEFT_CTRL: break;
-
-    case SCAN_CODE_KEY_LEFT_SHIFT:
-        g_shift_pressed = true;
-        break;
-
-    case SCAN_CODE_KEY_RIGHT_SHIFT:
-        g_shift_pressed = true;
-        break;
-
-    case SCAN_CODE_KEY_BACKSPACE:
-        break;
-
-    default:
-        {
-			char ch = keyboard_scancode_to_char(scancode);
-			g_char_event(ch);
-			break;
-        }
-    }
+	keyboard_event_data_length++;
 }
 
-void keyboard_initialize(key_callback key_event, char_callback char_event)
+void keyboard_initialize(void)
 {
-    g_key_event = key_event;
-    g_char_event = char_event;
-
     isr_register_interrupt_handler(IRQ_BASE + IRQ1_KEYBOARD, keyboard_handler);
 }
