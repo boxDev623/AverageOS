@@ -35,7 +35,7 @@
 #define SCAN_CODE_KEY_SQUARE_OPEN_BRACKET         0x1A
 #define SCAN_CODE_KEY_SQUARE_CLOSE_BRACKET         0x1B
 #define SCAN_CODE_KEY_ENTER         0x1C
-#define SCAN_CODE_KEY_LEFT_CTRL         0x1D
+#define SCAN_CODE_KEY_LEFT_CTRL         0x1D 
 #define SCAN_CODE_KEY_A         0x1E
 #define SCAN_CODE_KEY_S         0x1F
 #define SCAN_CODE_KEY_D         0x20
