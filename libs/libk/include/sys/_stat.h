@@ -82,16 +82,12 @@ __extension__ struct stat {
 #define st_birthtime st_birthtimespec.tv_sec
 };
 
-#elif defined(_WIN32)
-
+#else
 typedef unsigned __int16 mode_t;
 
 struct stat {
     mode_t st_mode;
 };
-
-#else
-#error Undefined platform for stat
 #endif /* defined(__linux__) && defined(__x86_64__) */
 
 int stat(const char *, struct stat *);

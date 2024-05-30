@@ -110,7 +110,7 @@ void keyboard_handler(regs_t *r)
 			break;
 		}
 
-		event_data->ch = NULL;
+		event_data->ch = 0;
 	}
 	else
 	{

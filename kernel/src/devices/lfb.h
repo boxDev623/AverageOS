@@ -66,13 +66,11 @@ typedef struct
 }
 vbe20_mode_info_block_t;
 
-uint32_t lfb_get_width(void);
-uint32_t lfb_get_height(void);
+extern uint32_t lfb_width;
+extern uint32_t lfb_height;
+extern uint32_t *lfb_vbe_buffer;
 
 int lfb_initialize(uint32_t width, uint32_t height, uint32_t bpp);
-
-uint32_t *lfb_get_vbebuffer(void);
-void lfb_clear_vbebuffer(void);
 
 void lfb_put_pixel(int x, int y, int color);
 uint32_t lfb_get_pixel(int x, int y);

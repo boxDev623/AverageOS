@@ -1,14 +1,16 @@
 #include "mouse.h"
 #include "intr/isr.h"
 #include "devices/lfb.h"
+#include "io.h"
 
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 #include <printk.h>
 
 int g_mouse_x_pos = 0, g_mouse_y_pos = 0;
 int prev_x = 0, prev_y = 0;
-uint32_t under_mouse_buffer = NULL;
+uint32_t under_mouse_buffer;
 
 #define MOUSE_size_x 8
 #define MOUSE_size_y 8
@@ -31,7 +33,7 @@ mouse_status_t mouse_get_status(void)
 }
 
 void mouse_wait(bool type) {
-    uint32_t time_out = 100000;
+    uint32_t time_out = 10000000;
     if (type == false) {
         // suspend until status is 1
         while (time_out--) {
@@ -103,7 +105,6 @@ void mouse_handler(regs_t *r)
 {
     static uint8_t mouse_cycle = 0;
     static char mouse_byte[3];
-    //bitmap_draw_char('X', prev_x, prev_y, vbe_rgb(0,0,0));
     switch (mouse_cycle) {
         case 0:
             mouse_byte[0] = mouse_read();
@@ -116,18 +117,18 @@ void mouse_handler(regs_t *r)
             break;
         case 2:
             mouse_byte[2] = mouse_read();
+
             g_mouse_x_pos = g_mouse_x_pos + mouse_byte[1];
             g_mouse_y_pos = g_mouse_y_pos - mouse_byte[2];
 
             if (g_mouse_x_pos < 0)
                 g_mouse_x_pos = 0;
+            else if (g_mouse_x_pos > lfb_width)
+                g_mouse_x_pos = lfb_width - 1;
             if (g_mouse_y_pos < 0)
                 g_mouse_y_pos = 0;
-            if (g_mouse_x_pos > (int)lfb_get_width())
-                g_mouse_x_pos = (int)lfb_get_width() - 1;
-            if (g_mouse_y_pos > (int)lfb_get_height())
-                g_mouse_y_pos = (int)lfb_get_height() - 1;
-            //bitmap_draw_char('X', g_mouse_x_pos, g_mouse_y_pos, vbe_rgb(255, 255, 255));
+            else if (g_mouse_y_pos > lfb_height)
+                g_mouse_y_pos = lfb_height - 1;
             prev_x = g_mouse_x_pos;
             prev_y = g_mouse_y_pos;
             mouse_cycle = 0;

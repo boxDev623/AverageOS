@@ -1,5 +1,5 @@
 #include "printk.h"
-#include "printf.h"
+#include "libprintf.h"
 
 const char printk_buffer[5120];
 

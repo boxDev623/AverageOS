@@ -1,4 +1,5 @@
 #include "pic.h"
+#include "io.h"
 
 void pic8259_initialize(void)
 {

@@ -5,24 +5,13 @@
 #include <stdint.h>
 #include <string.h>
 
-vbe20_info_block_t g_vbe_info_block;
-vbe20_mode_info_block_t g_vbe_mode_info_block;
+vbe20_info_block_t vbe_info_block;
+vbe20_mode_info_block_t vbe_mode_info_block;
 
-int g_selected_mode = -1;
+int selected_mode = -1;
 
-uint32_t g_width = 0, g_height = 0;
-
-uint32_t *g_vbe_buffer = NULL;
-
-uint32_t lfb_get_width(void) 
-{
-    return g_width;
-}
-
-uint32_t lfb_get_height(void) 
-{
-    return g_height;
-}
+uint32_t lfb_width = 0, lfb_height = 0;
+uint32_t *lfb_vbe_buffer = NULL;
 
 int vbe_get_info(void)
 {
@@ -33,7 +22,7 @@ int vbe_get_info(void)
     in.di = BIOS_CONVENTIONAL_MEMORY;
     int86(0x10, &in, &out);
     
-    memcpy(&g_vbe_info_block, (void *)BIOS_CONVENTIONAL_MEMORY, sizeof(vbe20_info_block_t));
+    memcpy(&vbe_info_block, (void *)BIOS_CONVENTIONAL_MEMORY, sizeof(vbe20_info_block_t));
     return (out.ax == 0x4F);
 }
 
@@ -60,12 +49,12 @@ void vbe_set_mode(uint32_t mode)
 
 uint32_t vbe_find_mode(uint32_t width, uint32_t height, uint32_t bpp)
 {
-    uint16_t *mode_list = (uint16_t *)g_vbe_info_block.VideoModePtr;
+    uint16_t *mode_list = (uint16_t *)vbe_info_block.VideoModePtr;
     uint16_t mode = *mode_list++;
     while (mode != 0xffff)
     {
-        vbe_get_mode_info(mode, &g_vbe_mode_info_block);
-        if (g_vbe_mode_info_block.XResolution == width && g_vbe_mode_info_block.YResolution == height && g_vbe_mode_info_block.BitsPerPixel == bpp)
+        vbe_get_mode_info(mode, &vbe_mode_info_block);
+        if (vbe_mode_info_block.XResolution == width && vbe_mode_info_block.YResolution == height && vbe_mode_info_block.BitsPerPixel == bpp)
             return mode;
         mode = *mode_list++;
     }
@@ -76,7 +65,7 @@ void vbe_print_available_modes(void)
 {
     vbe20_mode_info_block_t modeinfoblock;
 
-    uint16_t *mode_list = (uint16_t *)g_vbe_info_block.VideoModePtr;
+    uint16_t *mode_list = (uint16_t *)vbe_info_block.VideoModePtr;
     uint16_t mode = *mode_list++;
     while (mode != 0xffff) {
         vbe_get_mode_info(mode, &modeinfoblock);
@@ -99,27 +88,17 @@ int lfb_initialize(uint32_t width, uint32_t height, uint32_t bpp)
     if (!vbe_get_info())
         return -1;
 
-    g_selected_mode = vbe_find_mode(width, height, bpp);
+    selected_mode = vbe_find_mode(width, height, bpp);
         
-    if (g_selected_mode == -1)
+    if (selected_mode == -1)
         return -1;
 
-    g_width = g_vbe_mode_info_block.XResolution;
-    g_height = g_vbe_mode_info_block.YResolution;
+    lfb_width = vbe_mode_info_block.XResolution;
+    lfb_height = vbe_mode_info_block.YResolution;
 
-    g_vbe_buffer = (uint32_t *)g_vbe_mode_info_block.PhysBasePtr;
+    lfb_vbe_buffer = (uint32_t *)vbe_mode_info_block.PhysBasePtr;
 
-    vbe_set_mode(g_selected_mode);
+    vbe_set_mode(selected_mode);
 
     return 0;
-}
-
-uint32_t *lfb_get_vbebuffer(void)
-{
-    return g_vbe_buffer;
-}
-
-void lfb_clear_vbebuffer(void)
-{
-    memset(g_vbe_buffer, lfb_rgb(25,25,25), g_width * g_height * sizeof(uint32_t));
 }

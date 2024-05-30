@@ -1,6 +1,7 @@
 #include "memmap.h"
 
 #include <stddef.h>
+#include <printk.h>
 
 extern uint8_t __kernel_section_start;
 extern uint8_t __kernel_section_end;

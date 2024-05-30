@@ -47,6 +47,14 @@ char *strstr(const char *, const char *);
 
 char *strtok(char *, const char *);
 
+double strtod(const char *, char **);
+
+float strtof(const char *, char **);
+
+long strtol(const char *, char **, int);
+
+unsigned long strtoul(const char *, char **, int);
+
 void *memset(void *, int, size_t);
 
 char *strerror(int);

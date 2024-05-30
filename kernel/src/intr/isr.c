@@ -1,4 +1,5 @@
 #include "isr.h"
+#include "pic.h"
 
 #include <stddef.h>
 #include <printk.h>

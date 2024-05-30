@@ -22,4 +22,5 @@ typedef struct
 }
 __attribute__((packed)) gdt_ptr_t;
 
+void gdt_set_entry(int32_t index, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
 void gdt_initialize(void);
