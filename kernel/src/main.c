@@ -16,6 +16,10 @@
 #include "graphics/nuklear.h"
 #include "graphics/images/logo.h"
 
+#include "apps/menu.h"
+#include "apps/snake.h"
+#include "apps/tetris.h"
+
 kernel_memory_map_t kmap;
 void __stack_chk_fail(void){}
 void __attribute__ ((noreturn))
@@ -62,10 +66,16 @@ void kmain(unsigned long magic, unsigned long addr)
         sprintf(dt2_str, "%i/%i/%i", dt.month, dt.day, dt.year);
         nk_begin(nk_ctx, "__Taskbar__", nk_rect(0.0f, 0.0f, lfb_width, 38.0f), NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BORDER);
         nk_layout_row_static(nk_ctx, 32.0f, 64.0f, 3);
-        nk_button_label(nk_ctx, "Menu");
+        if (nk_button_label(nk_ctx, "Menu"))
+            enable_app_menu = true;
         nk_label(nk_ctx, dt1_str, NK_TEXT_RIGHT);
         nk_label(nk_ctx, dt2_str, NK_TEXT_RIGHT);
         nk_end(nk_ctx);
+        
+        app_menu(nk_ctx);
+        app_snake();
+        app_tetris();
+        
         ui_end();
     }
 

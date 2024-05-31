@@ -74,6 +74,9 @@
 		"algorithm": "c",
 		"cmath": "c",
 		"lstring.h": "c",
-		"logo.h": "c"
+		"logo.h": "c",
+		"menu.h": "c",
+		"snake.h": "c",
+		"tetris.h": "c"
 	}
 }
