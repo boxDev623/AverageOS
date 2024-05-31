@@ -15,4 +15,4 @@ clean:
 
 .PHONY: run
 run:
-	qemu-system-i386 -display sdl -m 512M -cdrom averageos.iso
+	qemu-system-i386 -m 512M -cdrom averageos.iso

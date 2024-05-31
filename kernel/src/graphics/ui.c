@@ -29,7 +29,18 @@ struct nk_context *nk_ctx;
 
 void ui_initialize(void)
 {
-    rawfb = nk_rawfb_init(graphics_back_buffer, tex_scratch, lfb_width, lfb_height, lfb_width * 4, PIXEL_LAYOUT_XRGB_8888);
+	struct rawfb_pl pl;
+    pl.bytesPerPixel = 4;
+    pl.ashift = 24;
+    pl.rshift = 16;
+    pl.gshift = 8;
+    pl.bshift = 0;
+    pl.aloss = 0;
+    pl.rloss = 0;
+    pl.gloss = 0;
+    pl.bloss = 0;
+
+    rawfb = nk_rawfb_init(graphics_back_buffer, tex_scratch, lfb_width, lfb_height, lfb_width * 4, pl);
 	nk_ctx = &rawfb->ctx;
 }
 

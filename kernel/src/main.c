@@ -3,6 +3,7 @@
 #include "devices/lfb.h"
 #include "devices/rtc.h"
 #include "graphics/graphics.h"
+#define NK_ASSERT
 #include "graphics/ui.h"
 
 #include <printk.h>
@@ -59,7 +60,7 @@ void kmain(unsigned long magic, unsigned long addr)
         rtc_get_time(&dt);
         sprintf(dt1_str, "%i:%i:%i", dt.hour, dt.min, dt.sec);
         sprintf(dt2_str, "%i/%i/%i", dt.month, dt.day, dt.year);
-        nk_begin(nk_ctx, "__Taskbar__", nk_rect(0.0f, lfb_height - 38.0f, lfb_width, 38.0f), NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BORDER);
+        nk_begin(nk_ctx, "__Taskbar__", nk_rect(0.0f, 0.0f, lfb_width, 38.0f), NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BORDER);
         nk_layout_row_static(nk_ctx, 32.0f, 64.0f, 3);
         nk_button_label(nk_ctx, "Menu");
         nk_label(nk_ctx, dt1_str, NK_TEXT_RIGHT);
