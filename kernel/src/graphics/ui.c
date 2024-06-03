@@ -20,8 +20,6 @@
 #include "nuklear.h"
 #include "nuklear_rawfb.h"
 
-#include "images/wallpaper.h"
-
 unsigned char tex_scratch[512 * 512];
 
 struct rawfb_context *rawfb;
@@ -117,17 +115,6 @@ void ui_begin(void)
 
 void ui_end(void)
 {
-    {
-        uint32_t *wallpaper = wallpaper_waves_01;
-        uint32_t *back_buffer = graphics_back_buffer;
-
-        uint32_t *end_buffer = wallpaper + lfb_width * lfb_height;
-
-        for (; wallpaper < end_buffer; wallpaper++, back_buffer++)
-            *back_buffer = *wallpaper;
-    }
-
     nk_rawfb_render(rawfb, nk_black, 0);
-
     graphics_swapbuffers();
 }

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "graphics/nuklear.h"
-#include "appman.h"
 #include <stdbool.h>
 
 extern bool enable_app_tetris;
-extern const char app_tetris_code[];
-void app_tetris();
+
+void app_tetris_intialize(void);
+void app_tetris_update(void);

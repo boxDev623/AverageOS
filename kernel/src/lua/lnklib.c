@@ -41,6 +41,13 @@ static int lnk_window_is_closed(lua_State *L)
     return 1;
 }
 
+static int lnk_window_is_hidden(lua_State *L)
+{
+    nk_bool closed = nk_window_is_hidden(nk_ctx, luaL_checkstring(L, 1));
+    lua_pushboolean(L, closed);
+    return 1;
+}
+
 static int lnk_window_is_collapsed(lua_State *L)
 {
     nk_bool collapsed = nk_window_is_collapsed(nk_ctx, luaL_checkstring(L, 1));
@@ -218,6 +225,7 @@ static const luaL_Reg nklib[] = {
   {"window_is_closed", lnk_window_is_closed},
   {"window_is_collapsed", lnk_window_is_collapsed},
   {"window_is_active", lnk_window_is_active},
+  {"window_is_hidden", lnk_window_is_hidden},
   {"layout_row_static", lnk_layout_row_static},
   {"layout_row_dynamic", lnk_layout_row_dynamic},
   {"label", lnk_label},

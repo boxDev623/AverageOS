@@ -1,133 +1,152 @@
 #include "snake.h"
+#include "graphics/nuklear.h"
+#include "graphics/ui.h"
+
+#include <stdlib.h>
 
 bool enable_app_snake = false;
-const char app_snake_code[] = 
-"local TILE_SIZE = 20\n"
-"local BOARD_WIDTH = 20\n"
-"local BOARD_HEIGHT = 15\n"
-"local INITIAL_SNAKE_LENGTH = 5\n"
-"local DIRECTIONS = {\n"
-    "left = { x = -1, y = 0 },\n"
-    "right = { x = 1, y = 0 },\n"
-    "up = { x = 0, y = -1 },\n"
-    "down = { x = 0, y = 1 },\n"
-"}\n"
-"\n"
-"local snake = {}\n"
-"local snake_direction = \"right\"\n"
-"local food = {}\n"
-"local is_game_over = false\n"
-"local timer = 0\n"
-"local speed = 0.1\n"
-"\n"
-"local function place_food()\n"
-    "food.x = math.random(1, BOARD_WIDTH - 2)\n"
-    "food.y = math.random(1, BOARD_HEIGHT - 2)\n"
-"end\n"
-"\n"
-"local function initialize_game()\n"
-    "snake = {}\n"
-    "for i = 1, INITIAL_SNAKE_LENGTH do\n"
-        "table.insert(snake, { x = INITIAL_SNAKE_LENGTH - i + 1, y = 1 })\n"
-    "end\n"
-    "snake_direction = \"right\"\n"
-    "place_food()\n"
-    "is_game_over = false\n"
-    "timer = 0\n"
-"end\n"
-"\n"
-"local function check_collision(new_head)\n"
-    "if new_head.x < 1 or new_head.x > BOARD_WIDTH or new_head.y < 1 or new_head.y > BOARD_HEIGHT then\n"
-        "return true\n"
-    "end\n"
-    "for _, segment in ipairs(snake) do\n"
-        "if segment.x == new_head.x and segment.y == new_head.y then\n"
-            "return true\n"
-        "end\n"
-    "end\n"
-    "return false\n"
-"end\n"
-"\n"
-"local function update_snake()\n"
-    "local head = snake[1]\n"
-    "local new_head = {\n"
-        "x = head.x + DIRECTIONS[snake_direction].x,\n"
-        "y = head.y + DIRECTIONS[snake_direction].y,\n"
-    "}\n"
-"\n"
-    "if check_collision(new_head) then\n"
-        "is_game_over = true\n"
-        "return\n"
-    "end\n"
-"\n"
-    "table.insert(snake, 1, new_head)\n"
-    "if new_head.x == food.x and new_head.y == food.y then\n"
-        "place_food()\n"
-    "else\n"
-        "table.remove(snake)\n"
-    "end\n"
-"end\n"
-"\n"
-"local function handle_input()\n"
-    "if os.is_key_pressed(72) then\n"
-        "if snake_direction ~= \"down\" then\n"
-            "snake_direction = \"up\"\n"
-        "end\n"
-    "elseif os.is_key_pressed(80) then\n"
-        "if snake_direction ~= \"up\" then\n"
-            "snake_direction = \"down\"\n"
-        "end\n"
-    "elseif os.is_key_pressed(75) then\n"
-        "if snake_direction ~= \"right\" then\n"
-            "snake_direction = \"left\"\n"
-        "end\n"
-    "elseif os.is_key_pressed(77) then\n"
-        "if snake_direction ~= \"left\" then\n"
-            "snake_direction = \"right\"\n"
-        "end\n"
-    "end\n"
-"end\n"
-"\n"
-"local function render_game()\n"
-    "wx, wy = nuklear.widget_get_position()\n"
-    "local cmd_buffer = nuklear.get_canvas()\n"
-    "for _, segment in ipairs(snake) do\n"
-        "nuklear.fill_rect(cmd_buffer, { wx + (segment.x - 1) * TILE_SIZE, wy + (segment.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE }, 0, { 0, 255, 0, 255 })\n"
-    "end\n"
-    "nuklear.fill_rect(cmd_buffer, { wx + (food.x - 1) * TILE_SIZE, wy + (food.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE }, 0, { 255, 0, 0, 255 })\n"
-"end\n"
-"\n"
-"initialize_game()\n"
-"function __averageos_update_event__()\n"
-    "if is_game_over then\n"
-        "initialize_game()\n"
-    "end\n"
-    "if nuklear.window_is_active(\"Snake\") then\n"
-        "handle_input()\n"
-    "end\n"
-    "timer = timer + 1 / 60\n"
-    "if timer >= speed then\n"
-        "update_snake()\n"
-        "timer = 0\n"
-    "end\n"
-    "nuklear.begin_window(\"Snake\", 50, 50, 500, 500)\n"
-    "if nuklear.window_is_collapsed(\"Snake\") == false then\n"
-        "nuklear.layout_row_dynamic(nuklear.window_get_height(), 1)\n"
-        "render_game()\n"
-        "ww, wh = nuklear.widget_get_size()\n"
-        "BOARD_WIDTH = ww / TILE_SIZE\n"
-        "BOARD_HEIGHT = wh / TILE_SIZE\n"
-    "end\n"
-    "nuklear.end_window()\n"
-    "if nuklear.window_is_closed(\"Snake\") == true then\n"
-    	"os.close_proc(os.get_current_proc())\n"
-    "end\n"
-"end\n";
-void app_snake()
-{
-    if (enable_app_snake)
-    {
-        appman_new_proc("SNAKE", app_snake_code);
-        enable_app_snake = false;
+
+#define TILE_SIZE 20
+#define BOARD_WIDTH 23
+#define BOARD_HEIGHT 23
+#define INITIAL_SNAKE_LENGTH 5
+
+struct Position {
+    int x, y;
+};
+
+struct Snake {
+    struct Position segments[BOARD_WIDTH * BOARD_HEIGHT];
+    int length;
+    char direction;
+};
+
+static struct Position food;
+static int is_game_over = 0;
+static float timer = 0;
+static float speed = 0.1f;
+static struct Snake snake;
+
+static void place_food() {
+    food.x = rand() % (BOARD_WIDTH - 2) + 1;
+    food.y = rand() % (BOARD_HEIGHT - 2) + 1;
+}
+
+static void initialize_game() {
+    snake.length = INITIAL_SNAKE_LENGTH;
+    for (int i = 0; i < INITIAL_SNAKE_LENGTH; ++i) {
+        snake.segments[i].x = INITIAL_SNAKE_LENGTH - i;
+        snake.segments[i].y = 1;
     }
+    snake.direction = 'R';
+    place_food();
+    is_game_over = 0;
+    timer = 0;
+}
+
+static int check_collision(struct Position new_head) {
+    if (new_head.x < 1 || new_head.x > BOARD_WIDTH || new_head.y < 1 || new_head.y > BOARD_HEIGHT) {
+        return 1;
+    }
+    for (int i = 0; i < snake.length; ++i) {
+        if (snake.segments[i].x == new_head.x && snake.segments[i].y == new_head.y) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void update_snake() {
+    struct Position head = snake.segments[0];
+    struct Position new_head = head;
+
+    switch (snake.direction) {
+        case 'L': new_head.x--; break;
+        case 'R': new_head.x++; break;
+        case 'U': new_head.y--; break;
+        case 'D': new_head.y++; break;
+    }
+
+    if (check_collision(new_head)) {
+        is_game_over = 1;
+        return;
+    }
+
+    for (int i = snake.length; i > 0; --i) {
+        snake.segments[i] = snake.segments[i - 1];
+    }
+    snake.segments[0] = new_head;
+    snake.length++;
+
+    if (new_head.x == food.x && new_head.y == food.y) {
+        place_food();
+    } else {
+        snake.length--;
+    }
+}
+
+static void handle_input(struct nk_context *ctx) {
+    if (nk_input_is_key_pressed(&ctx->input, NK_KEY_UP)) {
+        if (snake.direction != 'D') snake.direction = 'U';
+    }
+    if (nk_input_is_key_pressed(&ctx->input, NK_KEY_DOWN)) {
+        if (snake.direction != 'U') snake.direction = 'D';
+    }
+    if (nk_input_is_key_pressed(&ctx->input, NK_KEY_LEFT)) {
+        if (snake.direction != 'R') snake.direction = 'L';
+    }
+    if (nk_input_is_key_pressed(&ctx->input, NK_KEY_RIGHT)) {
+        if (snake.direction != 'L') snake.direction = 'R';
+    }
+}
+
+static void render_game(struct nk_context *ctx) {
+    struct nk_command_buffer *canvas = nk_window_get_canvas(ctx);
+    struct nk_rect total_space = nk_window_get_content_region(ctx);
+
+    for (int i = 0; i < snake.length; ++i) {
+        struct Position segment = snake.segments[i];
+        nk_fill_rect(canvas, nk_rect(total_space.x + (segment.x - 1) * TILE_SIZE, 
+                                     total_space.y + (segment.y - 1) * TILE_SIZE, 
+                                     TILE_SIZE, TILE_SIZE), 0, nk_rgb(0, 255, 0));
+    }
+
+    nk_fill_rect(canvas, nk_rect(total_space.x + (food.x - 1) * TILE_SIZE, 
+                                 total_space.y + (food.y - 1) * TILE_SIZE, 
+                                 TILE_SIZE, TILE_SIZE), 0, nk_rgb(255, 0, 0));
+}
+
+void app_snake_initialize(void)
+{
+    initialize_game();
+}
+
+void app_snake_update(void)
+{
+    if (is_game_over)
+        initialize_game();
+
+    if (nk_window_is_active(nk_ctx, "Snake"))
+        handle_input(nk_ctx);
+
+    timer += 1.0f / 60.0f;
+    if (timer >= speed)
+    {
+        update_snake();
+        timer = 0;
+    }
+
+    if (nk_begin(nk_ctx, "Snake", nk_rect(50, 50, 500, 500), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE))
+    {
+        int x, y;
+        struct nk_rect bounds = nk_window_get_content_region(nk_ctx);
+        x = (int)bounds.w;
+        y = (int)bounds.h;
+        nk_layout_row_static(nk_ctx, y, x, 1);
+        render_game(nk_ctx);
+    }
+    nk_end(nk_ctx);
+
+    if (nk_window_is_hidden(nk_ctx, "Snake"))
+        enable_app_snake = false;
 }

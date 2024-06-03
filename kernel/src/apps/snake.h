@@ -5,5 +5,5 @@
 #include <stdbool.h>
 
 extern bool enable_app_snake;
-extern const char app_snake_code[];
-void app_snake();
+void app_snake_initialize(void);
+void app_snake_update(void);

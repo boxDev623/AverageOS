@@ -1,243 +1,269 @@
-#include "tetris.h"
+#include "text_editor.h"
+#include "graphics/nuklear.h"
+#include "graphics/ui.h"
+
+#include "devices/ps2/keyboard.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+#define BOARD_WIDTH 10
+#define BOARD_HEIGHT 20
+#define TILE_SIZE 30
+#define MAX_COLOR_VALUE 255
+#define SHADOW_COLOR_MULTIPLIER 0.5
+
+// Tetromino definitions
+int TETROMINOS[7][4][4] = {
+    { {1, 1, 1, 1} }, // I
+    { {1, 1}, {1, 1} }, // O
+    { {0, 1, 1}, {1, 1, 0} }, // S
+    { {1, 1, 0}, {0, 1, 1} }, // Z
+    { {1, 1, 1}, {0, 1, 0} }, // T
+    { {1, 1, 1}, {1, 0, 0} }, // L
+    { {1, 1, 1}, {0, 0, 1} }, // J
+};
+
+struct Color {
+    int r, g, b, a;
+};
+
+struct Color COLORS[7] = {
+    {0, 255, 255, 255}, // I
+    {255, 255, 0, 255}, // O
+    {0, 255, 0, 255}, // S
+    {255, 0, 0, 255}, // Z
+    {128, 0, 128, 255}, // T
+    {255, 165, 0, 255}, // L
+    {0, 0, 255, 255}, // J
+};
+
+static int board[BOARD_HEIGHT][BOARD_WIDTH];
+static int current_piece[4][4];
+static struct Color current_color;
+static int current_x, current_y;
+static int is_game_over = 0;
+static double timer = 0;
+static double speed = 0.5; // Time in seconds between each move
+
+// Function prototypes
+static void initialize_game();
+static void new_piece();
+static int check_collision(int piece[4][4], int x, int y);
+static void lock_piece();
+static void clear_lines();
+static void rotate_piece();
+static void handle_input();
+static int get_shadow_position();
+static void render_game(struct nk_context *ctx);
+
+static void initialize_game() {
+    memset(board, 0, sizeof(board));
+    new_piece();
+    is_game_over = 0;
+    timer = 0;
+}
+
+static void new_piece() {
+    int index = rand() % 7;
+    memcpy(current_piece, TETROMINOS[index], sizeof(current_piece));
+    current_color = COLORS[index];
+    current_x = BOARD_WIDTH / 2 - 2;
+    current_y = 0;
+    if (check_collision(current_piece, current_x, current_y)) {
+        is_game_over = 1;
+    }
+}
+
+static int check_collision(int piece[4][4], int x, int y) {
+    for (int py = 0; py < 4; ++py) {
+        for (int px = 0; px < 4; ++px) {
+            if (piece[py][px] != 0) {
+                int bx = x + px;
+                int by = y + py;
+                if (bx < 0 || bx >= BOARD_WIDTH || by < 0 || by >= BOARD_HEIGHT || board[by][bx] != 0) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+static void lock_piece() {
+    for (int py = 0; py < 4; ++py) {
+        for (int px = 0; px < 4; ++px) {
+            if (current_piece[py][px] != 0) {
+                board[current_y + py][current_x + px] = 1; // Mark board position as filled
+            }
+        }
+    }
+    clear_lines();
+    new_piece();
+}
+
+static void clear_lines() {
+    for (int y = 0; y < BOARD_HEIGHT; ++y) {
+        int full = 1;
+        for (int x = 0; x < BOARD_WIDTH; ++x) {
+            if (board[y][x] == 0) {
+                full = 0;
+                break;
+            }
+        }
+        if (full) {
+            for (int ty = y; ty > 0; --ty) {
+                memcpy(board[ty], board[ty - 1], sizeof(board[ty]));
+            }
+            memset(board[0], 0, sizeof(board[0]));
+        }
+    }
+}
+
+void rotate_piece() {
+    int new_piece[4][4] = {0};
+    for (int x = 0; x < 4; ++x) {
+        for (int y = 0; y < 4; ++y) {
+            new_piece[x][y] = current_piece[3 - y][x];
+        }
+    }
+
+    if (!check_collision(new_piece, current_x, current_y)) {
+        memcpy(current_piece, new_piece, sizeof(current_piece));
+    }
+}
+
+static float key_timer = 0.0f;
+static bool rotate_pressed = false;
+static bool space_pressed = false;
+
+static void handle_input() {
+    key_timer += 1.0f / 4.0f;
+    if (keyboard_get_scancode(75) && key_timer > 1.0f) { // Left arrow
+        if (!check_collision(current_piece, current_x - 1, current_y)) {
+            current_x -= 1;
+        }
+        key_timer = 0.0f;
+    } else if (keyboard_get_scancode(77) && key_timer > 1.0f) { // Right arrow
+        if (!check_collision(current_piece, current_x + 1, current_y)) {
+            current_x += 1;
+        }
+        key_timer = 0.0f;
+    } else if (keyboard_get_scancode(80) && key_timer > 1.0f) { // Down arrow
+        if (!check_collision(current_piece, current_x, current_y + 1)) {
+            current_y += 1;
+        } else {
+            lock_piece();
+        }
+        key_timer = 0.0f;
+    } else if (keyboard_get_scancode(72) && !rotate_pressed) { // Up arrow
+        rotate_piece();
+        rotate_pressed = true;
+    } else if (keyboard_get_scancode(57) && !space_pressed) { // Space bar
+        current_y = get_shadow_position();
+        lock_piece();
+        space_pressed = true;
+    }
+
+    if (!keyboard_get_scancode(72))
+        rotate_pressed = false;
+
+    if (!keyboard_get_scancode(57))
+        space_pressed = false;
+}
+
+static int get_shadow_position() {
+    int shadow_y = current_y;
+    while (!check_collision(current_piece, current_x, shadow_y + 1)) {
+        shadow_y += 1;
+    }
+    return shadow_y;
+}
+
+static void render_game(struct nk_context *ctx) {
+    struct nk_command_buffer *cmd_buffer = nk_window_get_canvas(ctx);
+    struct nk_vec2 win_size = nk_widget_position(ctx);
+
+    // Draw the board
+    for (int y = 0; y < BOARD_HEIGHT; ++y) {
+        for (int x = 0; x < BOARD_WIDTH; ++x) {
+            if (board[y][x] != 0) {
+                struct nk_rect rect = nk_rect(win_size.x + x * TILE_SIZE, win_size.y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                nk_fill_rect(cmd_buffer, rect, 0, nk_rgba(255, 255, 255, 255));
+            }
+        }
+    }
+
+    // Draw the shadow piece
+    int shadow_y = get_shadow_position();
+    struct nk_color shadow_color = {
+        current_color.r * SHADOW_COLOR_MULTIPLIER,
+        current_color.g * SHADOW_COLOR_MULTIPLIER,
+        current_color.b * SHADOW_COLOR_MULTIPLIER,
+        current_color.a * SHADOW_COLOR_MULTIPLIER
+    };
+    for (int py = 0; py < 4; ++py) {
+        for (int px = 0; px < 4; ++px) {
+            if (current_piece[py][px] != 0) {
+                struct nk_rect rect = nk_rect(win_size.x + (current_x + px) * TILE_SIZE, win_size.y + (shadow_y + py) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                nk_fill_rect(cmd_buffer, rect, 0, nk_rgba(100, 100, 100, 100));
+            }
+        }
+    }
+
+    // Draw the current piece
+    for (int py = 0; py < 4; ++py) {
+        for (int px = 0; px < 4; ++px) {
+            if (current_piece[py][px] != 0) {
+                struct nk_rect rect = nk_rect(win_size.x + (current_x + px) * TILE_SIZE, win_size.y + (current_y + py) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                nk_fill_rect(cmd_buffer, rect, 0, nk_rgba(255, 255, 255, 255));
+            }
+        }
+    }
+}
+
+static void update_event(struct nk_context *ctx) {
+    if (is_game_over) {
+        initialize_game();
+        return;
+    }
+
+    if (nk_window_is_active(nk_ctx, "Tetris"))
+        handle_input();
+
+    timer += 1.0 / 60.0; // Assuming 60 FPS
+    if (timer >= speed) {
+        if (!check_collision(current_piece, current_x, current_y + 1)) {
+            current_y += 1;
+        } else {
+            lock_piece();
+        }
+        timer = 0;
+    }
+
+    render_game(ctx);
+}
 
 bool enable_app_tetris = false;
-const char app_tetris_code[] = 
-"local BOARD_WIDTH = 10\n"
-"local BOARD_HEIGHT = 20\n"
-"local TILE_SIZE = 30\n"
-"local TETROMINOS = {\n"
-"    { {1, 1, 1, 1} }, -- I\n"
-"    { {1, 1}, {1, 1} }, -- O\n"
-"    { {0, 1, 1}, {1, 1, 0} }, -- S\n"
-"    { {1, 1, 0}, {0, 1, 1} }, -- Z\n"
-"    { {1, 1, 1}, {0, 1, 0} }, -- T\n"
-"    { {1, 1, 1}, {1, 0, 0} }, -- L\n"
-"    { {1, 1, 1}, {0, 0, 1} }, -- J\n"
-"}\n"
-"local COLORS = {\n"
-"    {r = 0, g = 255, b = 255, a = 255}, -- I\n"
-"    {r = 255, g = 255, b = 0, a = 255}, -- O\n"
-"    {r = 0, g = 255, b = 0, a = 255}, -- S\n"
-"    {r = 255, g = 0, b = 0, a = 255}, -- Z\n"
-"    {r = 128, g = 0, b = 128, a = 255}, -- T\n"
-"    {r = 255, g = 165, b = 0, a = 255}, -- L\n"
-"    {r = 0, g = 0, b = 255, a = 255}, -- J\n"
-"}\n"
-"local SHADOW_COLOR_MULTIPLIER = 0.3\n"
-"\n"
-"local board\n"
-"local current_piece\n"
-"local current_color\n"
-"local current_x, current_y\n"
-"local is_game_over = false\n"
-"local timer = 0\n"
-"local speed = 0.5\n"
-"local keys = {\n"
-    "left = 0.0,\n"
-    "right = 0.0,\n"
-    "down = 0.0,\n"
-    "up = false,\n"
-    "space = false\n"
-"}\n"
-"\n"
-"local function check_collision(piece, x, y)\n"
-"    for py = 1, #piece do\n"
-"        for px = 1, #piece[py] do\n"
-"            if piece[py][px] ~= 0 then\n"
-"                local bx = x + px\n"
-"                local by = y + py\n"
-"                if bx < 1 or bx > BOARD_WIDTH or by < 1 or by > BOARD_HEIGHT or board[by][bx] ~= 0 then\n"
-"                    return true\n"
-"                end\n"
-"            end\n"
-"        end\n"
-"    end\n"
-"    return false\n"
-"end\n"
-"\n"
-"local function new_piece()\n"
-"    local index = math.random(#TETROMINOS)\n"
-"    current_piece = TETROMINOS[index]\n"
-"    current_color = COLORS[index]\n"
-"    current_x = math.floor(BOARD_WIDTH / 2) - math.floor(#current_piece[1] / 2)\n"
-"    current_y = 1\n"
-"    if check_collision(current_piece, current_x, current_y) then\n"
-"        is_game_over = true\n"
-"    end\n"
-"end\n"
-"\n"
-"local function initialize_game()\n"
-"    board = {}\n"
-"    for y = 1, BOARD_HEIGHT do\n"
-"        board[y] = {}\n"
-"        for x = 1, BOARD_WIDTH do\n"
-"            board[y][x] = 0\n"
-"        end\n"
-"    end\n"
-"    new_piece()\n"
-"    is_game_over = false\n"
-"    timer = 0\n"
-"end\n"
-"\n"
-"local function clear_lines()\n"
-"    for y = 1, BOARD_HEIGHT do\n"
-"        local full = true\n"
-"        for x = 1, BOARD_WIDTH do\n"
-"            if board[y][x] == 0 then\n"
-"                full = false\n"
-"                break\n"
-"            end\n"
-"        end\n"
-"        if full then\n"
-"            for ty = y, 2, -1 do\n"
-"                board[ty] = board[ty - 1]\n"
-"            end\n"
-"            board[1] = {}\n"
-"            for x = 1, BOARD_WIDTH do\n"
-"                board[1][x] = 0\n"
-"            end\n"
-"        end\n"
-"    end\n"
-"end\n"
-"\n"
-"local function lock_piece()\n"
-"    for py = 1, #current_piece do\n"
-"        for px = 1, #current_piece[py] do\n"
-"            if current_piece[py][px] ~= 0 then\n"
-"                board[current_y + py][current_x + px] = current_color\n"
-"            end\n"
-"        end\n"
-"    end\n"
-"    clear_lines()\n"
-"    new_piece()\n"
-"end\n"
-"\n"
-"local function rotate_piece()\n"
-"    local new_piece = {}\n"
-"    for x = 1, #current_piece[1] do\n"
-"        new_piece[x] = {}\n"
-"        for y = 1, #current_piece do\n"
-"            new_piece[x][y] = current_piece[#current_piece - y + 1][x]\n"
-"        end\n"
-"    end\n"
-"    if not check_collision(new_piece, current_x, current_y) then\n"
-"        current_piece = new_piece\n"
-"    end\n"
-"end\n"
-"\n"
-"local function get_shadow_position()\n"
-"    local shadow_y = current_y\n"
-"    while not check_collision(current_piece, current_x, shadow_y + 1) do\n"
-"        shadow_y = shadow_y + 1\n"
-"    end\n"
-"    return shadow_y\n"
-"end\n"
-"\n"
-"local function handle_input()\n"
-    "keys.left = keys.left + 1 / 4\n"
-    "keys.right = keys.right + 1 / 4\n"
-    "keys.down = keys.down + 1 / 4\n"
-"    if os.is_key_pressed(75) and keys.left > 1.0 then\n"
-"        if not check_collision(current_piece, current_x - 1, current_y) then\n"
-"            current_x = current_x - 1\n"
-"        end\n"
-        "keys.left = 0\n"
-"    elseif os.is_key_pressed(77) and keys.right > 1.0 then\n"
-"        if not check_collision(current_piece, current_x + 1, current_y) then\n"
-"            current_x = current_x + 1\n"
-"        end\n"
-        "keys.right = 0\n"
-"    elseif os.is_key_pressed(80) and keys.down > 1.0 then\n"
-"        if not check_collision(current_piece, current_x, current_y + 1) then\n"
-"            current_y = current_y + 1\n"
-"        else\n"
-"            lock_piece()\n"
-"        end\n"
-        "keys.down = 0\n"
-"    elseif os.is_key_pressed(72) and keys.up == false then\n"
-"        rotate_piece()\n"
-        "keys.up = true\n"
-"    elseif os.is_key_pressed(57) and keys.space == false then\n"
-"        current_y = get_shadow_position()\n"
-"        lock_piece()\n"
-        "keys.space = true\n"
-"    end\n"
 
-    "if os.is_key_pressed(72) == false then\n"
-        "keys.up = false\n"
-    "end\n"
-    "if os.is_key_pressed(57) == false then\n"
-        "keys.space = false\n"
-    "end\n"
-"end\n"
-"\n"
-"local function render_game()\n"
-"    local cmd_buffer = nuklear.get_canvas()\n"
-    "wx, wy = nuklear.widget_get_position()\n"
-"\n"
-"    for y = 1, BOARD_HEIGHT do\n"
-"        for x = 1, BOARD_WIDTH do\n"
-"            local color = board[y][x]\n"
-"            if color ~= 0 then\n"
-"                nuklear.fill_rect(cmd_buffer, { wx + (x - 1) * TILE_SIZE, wy + (y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE }, 0, {color.r, color.g, color.b, color.a})\n"
-"            end\n"
-"        end\n"
-"    end\n"
-"\n"
-"    local shadow_y = get_shadow_position()\n"
-"    local shadow_color = {\n"
-"        current_color.r * SHADOW_COLOR_MULTIPLIER,\n"
-"        current_color.g * SHADOW_COLOR_MULTIPLIER,\n"
-"        current_color.b * SHADOW_COLOR_MULTIPLIER,\n"
-"        current_color.a * SHADOW_COLOR_MULTIPLIER,\n"
-"    }\n"
-"    for py = 1, #current_piece do\n"
-"        for px = 1, #current_piece[py] do\n"
-"            if current_piece[py][px] ~= 0 then\n"
-"                nuklear.fill_rect(cmd_buffer, { wx + (current_x + px - 1) * TILE_SIZE, wy + (shadow_y + py - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE }, 0, shadow_color)\n"
-"            end\n"
-"        end\n"
-"    end\n"
-"\n"
-"    for py = 1, #current_piece do\n"
-"        for px = 1, #current_piece[py] do\n"
-"            if current_piece[py][px] ~= 0 then\n"
-"                nuklear.fill_rect(cmd_buffer, { wx + (current_x + px - 1) * TILE_SIZE, wy + (current_y + py - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE }, 0, {current_color.r, current_color.g, current_color.b, current_color.a})\n"
-"            end\n"
-"        end\n"
-"    end\n"
-"end\n"
-"\n"
-"initialize_game()\n"
-"function __averageos_update_event__()\n"
-"    if is_game_over then\n"
-"        initialize_game()\n"
-"    end\n"
-    "if nuklear.window_is_active(\"Tetris\") then\n"
-        "handle_input()\n"
-    "end\n"
-"    timer = timer + 1 / 60\n"
-"    if timer >= speed then\n"
-"        if not check_collision(current_piece, current_x, current_y + 1) then\n"
-"            current_y = current_y + 1\n"
-"        else\n"
-"            lock_piece()\n"
-"        end\n"
-"        timer = 0\n"
-"    end\n"
-"\n"
-    "nuklear.begin_window(\"Tetris\", 50, 50, (BOARD_WIDTH + 1) * TILE_SIZE, (BOARD_HEIGHT + 1) * TILE_SIZE + 20)\n"
-    "if nuklear.window_is_collapsed(\"Tetris\") == false then\n"
-        "nuklear.layout_row_dynamic(nuklear.window_get_height(), 1)\n"
-        "render_game()\n"
-    "end\n"
-    "nuklear.end_window()\n"
-"end\n";
-void app_tetris()
+void app_tetris_intialize(void)
 {
-    if (enable_app_tetris)
+    initialize_game();
+}
+
+void app_tetris_update(void)
+{
+    if (nk_begin(nk_ctx, "Tetris", nk_rect(50, 50, 340, 660), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE))
     {
-        appman_new_proc("TETRIS", app_tetris_code);
-        enable_app_tetris = false;
+        int x, y;
+        struct nk_rect bounds = nk_window_get_content_region(nk_ctx);
+        x = (int)bounds.w;
+        y = (int)bounds.h;
+        nk_layout_row_static(nk_ctx, y, x, 1);
+        update_event(nk_ctx);
     }
+    nk_end(nk_ctx);
+
+    if (nk_window_is_hidden(nk_ctx, "Tetris"))
+        enable_app_tetris = false;
 }

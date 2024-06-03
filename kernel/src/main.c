@@ -20,6 +20,10 @@
 #include "apps/snake.h"
 #include "apps/tetris.h"
 
+#include "graphics/images/wallpaper.h"
+
+uint32_t *wallpaper_current_ptr = wallpaper_waves_01;
+
 kernel_memory_map_t kmap;
 void __stack_chk_fail(void){}
 void __attribute__ ((noreturn))
@@ -60,7 +64,6 @@ void kmain(unsigned long magic, unsigned long addr)
     while (true)
     {
         ui_begin();
-        appman_update();
         rtc_get_time(&dt);
         sprintf(dt1_str, "%i:%i:%i", dt.hour, dt.min, dt.sec);
         sprintf(dt2_str, "%i/%i/%i", dt.month, dt.day, dt.year);
@@ -71,11 +74,18 @@ void kmain(unsigned long magic, unsigned long addr)
         nk_label(nk_ctx, dt1_str, NK_TEXT_RIGHT);
         nk_label(nk_ctx, dt2_str, NK_TEXT_RIGHT);
         nk_end(nk_ctx);
-        
+
         app_menu(nk_ctx);
-        app_snake();
-        app_tetris();
         
+        {
+            uint32_t *wallpaper = wallpaper_current_ptr;
+            uint32_t *back_buffer = graphics_back_buffer;
+
+            uint32_t *end_buffer = wallpaper + lfb_width * lfb_height;
+
+            for (; wallpaper < end_buffer; wallpaper++, back_buffer++)
+                *back_buffer = *wallpaper;
+        }
         ui_end();
     }
 
