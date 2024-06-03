@@ -1,6 +1,5 @@
-# AverageOS
-Yet another 32-bit operating system made in C...
 ![alt text](logo.png)
+Yet another 32-bit operating system made in C...
 
 ## Building:
 Simply run ```make``` and it will build (Linux only).
@@ -11,4 +10,4 @@ Simply run ```make``` and it will build (Linux only).
 >  ```nasm```.
 
 ## Testing:
-You can use ```VirtualBox``` or run ```make run``` to launch ```qemu-system-i386```.
+You can use ```QEMU``` or run ```make run``` to launch ```qemu-system-i386```.
