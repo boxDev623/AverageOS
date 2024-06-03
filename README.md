@@ -13,4 +13,4 @@ Simply run ```make``` and it will build (Linux only).
 You can use ```QEMU``` or run ```make run``` to launch ```qemu-system-i386```.
 
 ## Overview:
-[![Overview of AverageOS]](res/overview.mp4)
+[Overview video](https://youtu.be/blYK2Rt82WE)
