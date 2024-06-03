@@ -1,4 +1,4 @@
-![alt text](logo.png)
+![alt text](res/logo.png)
 Yet another 32-bit operating system made in C...
 
 ## Building:
@@ -11,3 +11,6 @@ Simply run ```make``` and it will build (Linux only).
 
 ## Testing:
 You can use ```QEMU``` or run ```make run``` to launch ```qemu-system-i386```.
+
+## Overview:
+[![Overview of AverageOS]](res/overview.mp4)
