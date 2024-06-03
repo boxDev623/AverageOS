@@ -136,7 +136,7 @@ void app_snake_update(void)
         timer = 0;
     }
 
-    if (nk_begin(nk_ctx, "Snake", nk_rect(50, 50, 500, 500), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE))
+    if (nk_begin(nk_ctx, "Snake", nk_rect(50, 50, 500, 500), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_NO_SCROLLBAR))
     {
         int x, y;
         struct nk_rect bounds = nk_window_get_content_region(nk_ctx);

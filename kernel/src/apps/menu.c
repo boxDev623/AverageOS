@@ -11,7 +11,7 @@ void app_menu(struct nk_context* ctx)
 {
     if (enable_app_menu)
     {
-        nk_begin(ctx, "Menu", nk_rect(0.0f, lfb_height - 362.0f, 250.0f, 400.0f),
+        nk_begin(ctx, "Menu", nk_rect(0.0f, 38.0f, 250.0f, 400.0f),
         NK_WINDOW_NO_SCROLLBAR);
         nk_layout_row_static(ctx, 20.0f, 225, 1);
 

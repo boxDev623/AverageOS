@@ -22,12 +22,29 @@
 
 #include "graphics/images/wallpaper.h"
 
-uint32_t *wallpaper_current_ptr = wallpaper_waves_01;
+uint32_t *wallpaper_current_ptr = wallpaper_averageos_01;
 
 kernel_memory_map_t kmap;
 void __stack_chk_fail(void){}
 void __attribute__ ((noreturn))
 __stack_chk_fail_local (void){__stack_chk_fail ();}
+
+bool enable_welcome_msg = true;
+void welcome_msg(struct nk_context* ctx)
+{
+    if (enable_welcome_msg){
+        if (nk_begin(ctx, "Welcome to AverageOS", nk_rect(620, 350, 200, 200), NK_WINDOW_NO_SCROLLBAR)){
+            nk_layout_row_static(ctx, 20, 175, 1);
+            nk_label(ctx, "Welcome to AverageOS!", NK_TEXT_ALIGN_CENTERED);
+            nk_label(ctx, "AverageOS is a homemade", NK_TEXT_ALIGN_CENTERED);
+            nk_label(ctx, "OS made entirely in C", NK_TEXT_ALIGN_CENTERED);
+            nk_label(ctx, "and NASM", NK_TEXT_ALIGN_CENTERED);
+
+            if (nk_button_label(ctx, "Continue"))
+                enable_welcome_msg = false;
+        } nk_end(ctx);
+    }
+}
 
 void kmain(unsigned long magic, unsigned long addr)
 {
@@ -64,6 +81,10 @@ void kmain(unsigned long magic, unsigned long addr)
     while (true)
     {
         ui_begin();
+
+        // WELCOME
+        welcome_msg(nk_ctx);
+
         rtc_get_time(&dt);
         sprintf(dt1_str, "%i:%i:%i", dt.hour, dt.min, dt.sec);
         sprintf(dt2_str, "%i/%i/%i", dt.month, dt.day, dt.year);

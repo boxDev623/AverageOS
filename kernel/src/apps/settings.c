@@ -19,7 +19,7 @@ bool enable_app_settings = false;
 
 void app_settings_initialize(void)
 {
-    strcpy(settings.wallpaper_type, "Waves 01");
+    strcpy(settings.wallpaper_type, "AverageOS");
 }
 
 void app_settings_update(void)
@@ -31,15 +31,25 @@ void app_settings_update(void)
             nk_layout_row_dynamic(nk_ctx, 30, 1);
             if (nk_combo_begin_label(nk_ctx, settings.wallpaper_type, nk_vec2(200,200))) {
                 nk_layout_row_dynamic(nk_ctx, 25, 1);
+                if (nk_combo_item_label(nk_ctx, "AverageOS", NK_TEXT_LEFT))
+                {
+                    wallpaper_current_ptr = wallpaper_averageos_01;
+                    strcpy(settings.wallpaper_type, "AverageOS");
+                }
                 if (nk_combo_item_label(nk_ctx, "Mountains", NK_TEXT_LEFT))
                 {
                     wallpaper_current_ptr = wallpaper_mountains_01;
                     strcpy(settings.wallpaper_type, "Mountains");
                 }
-                if (nk_combo_item_label(nk_ctx, "Waves 01", NK_TEXT_LEFT))
+                if (nk_combo_item_label(nk_ctx, "Waves", NK_TEXT_LEFT))
                 {
                     wallpaper_current_ptr = wallpaper_waves_01;
-                    strcpy(settings.wallpaper_type, "Waves 01");
+                    strcpy(settings.wallpaper_type, "Waves");
+                }
+                if (nk_combo_item_label(nk_ctx, "Bliss", NK_TEXT_LEFT))
+                {
+                    wallpaper_current_ptr = wallpaper_bliss_01;
+                    strcpy(settings.wallpaper_type, "Bliss");
                 }
                 nk_combo_end(nk_ctx);
             }
